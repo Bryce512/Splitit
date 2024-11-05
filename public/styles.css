@@ -1,6 +1,21 @@
+:root {
+  --main-color: #4db6ac;
+  --secondar-color: #2ecc71;
+  --text-main: white;
+}
+
+.main_Color{
+  color: var(--main-color);
+  background-color: var(--main-color);
+}
+.txt_MainColor {
+  color: var(--text-main);
+}
+
+
 .avatar {
-  width: 36px;         /* Adjust size as needed */
-  height: 36px;
+  width: 45px;         /* Adjust size as needed */
+  height: 45px;
   border-radius: 50%;  /* Makes the image circular */
   margin-left: 10px;   /* Adds a little space from the other links */
 }
@@ -23,4 +38,25 @@
 
 .hide-on-med-and-down .avatar-mobile {
   display: none;
+}
+
+.header-text {
+  border-bottom: 1px solid #000000;
+}
+
+/* Ensure the collection takes up the full width */
+.collection {
+  width: 100%;
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: grey;
+}
+
+/* Ensure each collection item also spans the full width */
+.collection-item {
+  width: 100%;
+  border-radius: 0px;
+  box-sizing: border-box; /* Ensures padding does not affect width */
 }
