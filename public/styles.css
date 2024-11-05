@@ -1,0 +1,26 @@
+.avatar {
+  width: 36px;         /* Adjust size as needed */
+  height: 36px;
+  border-radius: 50%;  /* Makes the image circular */
+  margin-left: 10px;   /* Adds a little space from the other links */
+}
+
+.avatar-large {
+  display: block; /* Ensures it's displayed in the navbar */
+}
+
+.avatar-mobile {
+  display: block; /* Ensures it's displayed in the SideNav */
+  position: absolute; /* Position it to the right */
+  right: 10px; /* Adjust as needed */
+  top: 16px; /* Align with navbar height */
+}
+
+/* Hide avatar on the opposite side */
+.hide-on-large-only .avatar-large {
+  display: none;
+}
+
+.hide-on-med-and-down .avatar-mobile {
+  display: none;
+}

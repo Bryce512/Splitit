@@ -1,0 +1,26 @@
+{
+  "name": "splitit",
+  "version": "1.0.0",
+  "description": "# GitHub Common Terminal Commands Follow this guide to using common commands from command line to access GitHub.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bryce512/Splitit.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bryce512/Splitit/issues"
+  },
+  "homepage": "https://github.com/Bryce512/Splitit#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "knex": "^3.1.0",
+    "materialize-css": "^1.0.0",
+    "pg": "^8.13.1"
+  }
+}
