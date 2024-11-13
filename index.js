@@ -15,6 +15,11 @@ app.get('/', (req, res) => {
   res.render('home'); // Render the home.ejs file
 });
 
+// Serve the login page (login.ejs)
+app.get('/login', (req, res) => {
+  res.render('login');  // Renders 'login.ejs' file
+});
+
 // Serve static files (e.g., CSS) if needed
 app.use(express.static('public'));
 
