@@ -1,7 +1,7 @@
 :root {
   --main-color: #4db6ac;
-  --secondar-color: #2ecc71;
-  --text-main: white;
+  --secondary-color: #cee9e5;
+  --text-main: #eff8f6;
 }
 
 .main_Color{
@@ -59,4 +59,75 @@
   width: 100%;
   border-radius: 0px;
   box-sizing: border-box; /* Ensures padding does not affect width */
+}
+
+* Style for input and button */
+input[type="text"] {
+  padding: 10px;
+  width: 80%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  width: fit-content;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* General page setup */
+.loginBody {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.loginForm{
+  background-color: var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  padding: 4% 8%;
+  border: 1px solid var(--secondary-color);
+  border-radius: 10px;
+  text-align: center;
+}
+.loginForm div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginForm label,
+.loginForm input{
+  display: flex;
+  align-self: flex-start; /* Aligns the label to the left within its flex container */
+  text-align: left; /* Aligns the text within the label to the left */
+  width: 200px;
+}
+
+.page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-footer container {
+  padding: 40;
 }

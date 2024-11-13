@@ -8,8 +8,8 @@ app.use(express.urlencoded( {extended: true} ));
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-// app.get('path to route', (req,res) => res.sendFile(path.join(__dirname + "/path to html")));
-// app.get("/", (req,res) => res.sendFile(path.join(__dirname + "/home.html")));
+// Serve static files (CSS, images, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
 // Define route for home page
 app.get('/', (req, res) => {
   res.render('home'); // Render the home.ejs file
@@ -20,10 +20,13 @@ app.get('/login', (req, res) => {
   res.render('login');  // Renders 'login.ejs' file
 });
 
+//Submit Login Request
+app.post('/sendLogin', (req,res) => {
+  res.redirect('/');
+})
+
 // Serve static files (e.g., CSS) if needed
 app.use(express.static('public'));
-
-app.post("/storeIt", (req,res) => res.send(req.body));
 
 
 // port number, (parameters) => what you want it to do.
