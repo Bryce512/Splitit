@@ -26,7 +26,7 @@ Follow this guide to using common commands from command line to access GitHub.
 WARNING: This will reset all changes on your computer to the most recent push on the branch!
 
 Reset Everything
-> git reset
+> git reset --hard
 
 Or to reset to an older commit
   * > git revert <commit 1> <commit 2>
