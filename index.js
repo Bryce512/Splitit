@@ -1,7 +1,7 @@
 let express = require('express');
 let app = express();
 let path = require('path');
-
+const PORT = process.env.PORT || 3000
 // grab html form from file 
 // allows to pull JSON data from form 
 app.use(express.urlencoded( {extended: true} )); 
@@ -30,4 +30,4 @@ app.use(express.static('public'));
 
 
 // port number, (parameters) => what you want it to do.
-app.listen(3000, () => console.log('server started'));
+app.listen(PORT, () => console.log('Server started on port ' + PORT));
