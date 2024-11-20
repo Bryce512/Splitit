@@ -4,7 +4,7 @@
   "description": "# GitHub Common Terminal Commands Follow this guide to using common commands from command line to access GitHub.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,8 @@
     "knex": "^3.1.0",
     "materialize-css": "^1.0.0",
     "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
   }
 }
