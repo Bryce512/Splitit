@@ -24,17 +24,10 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, 'public')));
 // Define route for home page
 app.get('/', (req, res) => {
-  knex('pokemon')
-    .join('poke_type', 'pokemon.poke_type_id', '=', 'poke_type.id')
+  knex('users')
     .select(
-      'pokemon.id',
-      'pokemon.description',
-      'pokemon.base_total',
-      'pokemon.date_created',
-      'pokemon.active_poke',
-      'pokemon.gender',
-      'pokemon.poke_type_id',
-      'poke_type.description as poke_type_description'
+      'uses.id',
+      'users.userFirstName'
     )
     .then(pokemon => {
       // Render the index.ejs template and pass the data
