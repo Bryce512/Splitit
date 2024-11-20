@@ -6,13 +6,40 @@ const PORT = process.env.PORT || 3000
 // allows to pull JSON data from form 
 app.use(express.urlencoded( {extended: true} )); 
 
+const knex = require("knex") ({
+  client : "pg",
+  connection : {
+  host : process.env.RDS_HOSTNAME || "localhost",
+  user : process.env.RDS_USERNAME || "postgres",
+  password : process.env.RDS_password || "admin",
+  database : process.env.RDS_DB_NAME || "assignment3",
+  port : process.env.RDS_PORT || 5432,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false  // Fixed line
+}
+})
+
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 // Serve static files (CSS, images, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 // Define route for home page
 app.get('/', (req, res) => {
-  res.render('home'); // Render the home.ejs file
+  knex('pokemon')
+    .join('poke_type', 'pokemon.poke_type_id', '=', 'poke_type.id')
+    .select(
+      'pokemon.id',
+      'pokemon.description',
+      'pokemon.base_total',
+      'pokemon.date_created',
+      'pokemon.active_poke',
+      'pokemon.gender',
+      'pokemon.poke_type_id',
+      'poke_type.description as poke_type_description'
+    )
+    .then(pokemon => {
+      // Render the index.ejs template and pass the data
+      res.render('home', { pokemon });
+    })
 });
 
 // Serve the login page (login.ejs)
