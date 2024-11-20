@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   knex('users')
     .select(
-      'uses.id',
+      'users.id',
       'users.userFirstName'
     )
     .then(pokemon => {
