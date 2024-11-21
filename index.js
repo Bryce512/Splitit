@@ -9,10 +9,10 @@ app.use(express.urlencoded( {extended: true} ));
 const knex = require("knex") ({
   client : "pg",
   connection : {
-  host : process.env.RDS_HOSTNAME || "localhost",
-  user : process.env.RDS_USERNAME || "postgres",
-  password : process.env.RDS_PASSWORD || "admin",
-  database : process.env.RDS_DB_NAME || "assignment3",
+  host : process.env.RDS_HOSTNAME || "awseb-e-jscipcpyz9-stack-awsebrdsdatabase-roat50cnm4ii.c7kgaykw042g.us-east-2.rds.amazonaws.com",
+  user : process.env.RDS_USERNAME || "dev-admins",
+  password : process.env.RDS_PASSWORD || "Password123",
+  database : process.env.RDS_DB_NAME || "ebdb",
   port : process.env.RDS_PORT || 5432,
   ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : false  // Fixed line
 }
