@@ -115,5 +115,56 @@ app.post('/createHouse', async (req, res) => {
   }
 });
 
+// Route to display the new profile form
+app.get('/newProfile', (req, res) => {
+  res.render('newProfile', { error: null });
+});
+
+// Route to handle profile creation
+app.post('/createProfile', async (req, res) => {
+  try {
+    // Check if username already exists
+    const existingUser = await knex('users')
+      .where('username', req.body.username)
+      .first();
+
+    if (existingUser) {
+      return res.render('newProfile', { 
+        error: 'Username already exists' 
+      });
+    }
+
+    // Insert new user
+    const [userId] = await knex('users')
+      .insert({
+        username: req.body.username,
+        password: req.body.password, // In production, you should hash this
+        venmo_id: req.body.venmo_id,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        cellphone: req.body.cellphone,
+        email: req.body.email,
+        acct_balance: 0 // Default starting balance
+      })
+      .returning('user_id');
+
+    // If they're creating a profile to join a house, you might want to handle that here
+    if (req.query.house_id) {
+      await knex('user_houses').insert({
+        user_id: userId,
+        house_id: req.query.house_id
+      });
+    }
+
+    // Redirect to login page or dashboard
+    res.redirect('/login');
+  } catch (error) {
+    console.error('Error creating profile:', error);
+    res.render('newProfile', { 
+      error: 'Failed to create profile. Please try again.' 
+    });
+  }
+});
+
 // port number, (parameters) => what you want it to do.
 app.listen(PORT, () => console.log('Server started on port ' + PORT));
