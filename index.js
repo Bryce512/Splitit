@@ -57,14 +57,16 @@ app.get('/newHouse', (req, res) => {
 app.get('/newHouse', (req, res) => {
   // Get list of potential users from your users table
   knex('users')
-    .select('user_id', 'first_name', 'last_name')  // Updated column names
-    .then(users => {
-      res.render('newHouse', { users: users });
-    })
-    .catch(err => {
-      console.error('Error fetching users:', err);
-      res.render('newHouse', { users: [], error: 'Failed to load users' });
-    });
+  .select('user_id', 'first_name', 'last_name')
+  .then(users => {
+    console.log('Fetched users:', users); // Log the fetched users
+    res.render('newHouse', { users: users });
+  })
+  .catch(err => {
+    console.error('Error fetching users:', err); // Log the error
+    res.render('newHouse', { users: [], error: 'Failed to load users' })
+  })
+
 });
 
 // Route to handle the house creation form submission
