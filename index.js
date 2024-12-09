@@ -213,5 +213,10 @@ app.post('/createSplit', async (req, res) => {
   }
 });
 
+// About page route
+app.get('/about', (req, res) => {
+  res.render('about');
+});
+
 // port number, (parameters) => what you want it to do.
 app.listen(PORT, () => console.log('Server started on port ' + PORT));
