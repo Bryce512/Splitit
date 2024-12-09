@@ -45,10 +45,20 @@
                   <option value="" disabled selected>Choose tenant</option>
                   <% if (users && users.length > 0) { %>
                     <% users.forEach(function(user) { %>
-                      <option value="<%= user.userID %>">
-                        <%= user.firstName %> <%= user.lastName %>
+                      <option value="<%= user.user_id %>">
+                        <%= user.first_name %> <%= user.last_name %>
                       </option>
                     <% }); %>
+                  <% } %>
+
+                  <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                    <% users.forEach(function(user) { %>
+                      <option value="<%= user.user_id %>">
+                        <%= user.first_name %> <%= user.last_name %>
+                      </option>
+                    <% }); %>
+                  <% } else { %>
+                    <option value="" disabled>No users available</option>
                   <% } %>
                 </select>
                 <label>Select Tenant</label>
