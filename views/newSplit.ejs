@@ -3,17 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SplitIt-Home</title>
+  <title>SplitIt-New Split</title>
   
   <!-- Materialize CSS CDN -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  
-  <!-- Custom CSS (optional) -->
+  <!-- Materialize Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="/styles.css">
 </head>
-  <body>
+<body>
 
-  <%- include('components/Navbar') %>
+<!-- Navbar -->
+<nav class="nav-wrapper main_Color">
+  <div class="container">
+    <a href="/" class="brand-logo">SplitIt</a>
+    <ul class="right hide-on-med-and-down">
+      <li><a href="/">Home</a></li>
+      <li><a href="/newHouse">New House</a></li>
+      <li><a href="/newProfile">New Profile</a></li>
+      <li><a href="/newSplit">New Split</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <a href="#" data-target="mobile-nav" class="sidenav-trigger left hide-on-large-only">
+      <i class="material-icons">&#9776</i>
+    </a>
+    <li class="avatar-large right">
+      <a href="/profile">
+        <img src="https://via.placeholder.com/350" alt="User Avatar" class="avatar">
+      </a>
+    </li>
+  </div>
+</nav>
 
-  </body>
+<!-- SideNav for Mobile Screens -->
+<ul class="sidenav" id="mobile-nav">
+  <li><a href="/">Home</a></li>
+  <li><a href="/newHouse">New House</a></li>
+  <li><a href="/newProfile">New Profile</a></li>
+  <li><a href="/newSplit">New Split</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/contact">Contact</a></li>
+</ul>
+
+<!-- Main Content -->
+<div class="container">
+  <h2 class="center-align">Create New Split</h2>
+  
+  <div class="row">
+    <form class="col s12" action="/createSplit" method="POST">
+      <!-- Split Name Input -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">label</i>
+          <input id="split_name" name="split_name" type="text" class="validate" required>
+          <label for="split_name">Split Name</label>
+        </div>
+      </div>
+
+      <!-- House Selection Dropdown -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">home</i>
+          <select id="house_id" name="house_id" required>
+            <option value="" disabled selected>Choose your house</option>
+            <% if (houses && houses.length > 0) { %>
+              <% houses.forEach(function(house) { %>
+                <option value="<%= house.house_id %>">
+                  <%= house.st_address %> - <%= house.city %>, <%= house.state %>
+                </option>
+              <% }); %>
+            <% } else { %>
+              <option value="" disabled>No houses available</option>
+            <% } %>
+          </select>
+          <label>Select House</label>
+        </div>
+      </div>
+
+      <!-- Total Amount Input -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">attach_money</i>
+          <input id="total_amount" name="total_amount" type="number" step="0.01" class="validate" required>
+          <label for="total_amount">Total Amount</label>
+        </div>
+      </div>
+
+      <!-- Due Date Calendar -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">event</i>
+          <input id="date_due" name="date_due" type="text" class="datepicker" required>
+          <label for="date_due">Due Date</label>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="row">
+        <div class="col s12 center-align">
+          <button class="btn-large waves-effect waves-light" type="submit">
+            Create Split
+            <i class="material-icons right">add_circle</i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Materialize JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize select dropdown
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+
+    // Initialize datepicker with OK/Cancel buttons
+    var datepicker = document.querySelector('.datepicker');
+    M.Datepicker.init(datepicker, {
+      format: 'yyyy-mm-dd',
+      autoClose: true,
+      showClearBtn: true,
+      showDoneBtn: true,
+      doneText: 'OK',
+      cancelText: 'Cancel',
+      onClose: function() {
+        // Optional: Validate date here
+      }
+    });
+  });
+</script>
+
+</body>
 </html>

@@ -14,14 +14,14 @@
 
 
 .avatar {
-  width: 45px;         /* Adjust size as needed */
-  height: 45px;
-  border-radius: 50%;  /* Makes the image circular */
-  margin-left: 10px;   /* Adds a little space from the other links */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  vertical-align: middle;
 }
 
 .avatar-large {
-  display: block; /* Ensures it's displayed in the navbar */
+  display: inline-block;
 }
 
 .avatar-mobile {
@@ -141,4 +141,8 @@ button:hover {
 
 .page-footer container {
   padding: 40;
+}
+
+.container {
+  padding-right: 60px; /* Add space for the avatar */
 }
