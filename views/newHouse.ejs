@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SplitIt-New House</title>
+  
+  <!-- Materialize CSS CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <!-- Materialize Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<!-- Navbar (same as home.ejs) -->
+<nav class="nav-wrapper main_Color">
+  <div class="container">
+    <a href="#" class="brand-logo">SplitIt</a>
+    <ul class="right hide-on-med-and-down">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
+    </ul>
+    <a href="#" data-target="mobile-nav" class="sidenav-trigger left hide-on-large-only">
+      <i class="material-icons">&#9776</i>
+    </a>
+    <li class="avatar-large right">
+      <a href="/profile">
+        <img src="https://via.placeholder.com/350" alt="User Avatar" class="avatar">
+      </a>
+    </li>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container">
+  <h2 class="center-align">Create New House</h2>
+  
+  <div class="row">
+    <form class="col s12" action="/createHouse" method="POST">
+      <!-- House Name Input -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">home</i>
+          <input id="house_name" type="text" class="validate" required>
+          <label for="house_name">House Name</label>
+        </div>
+      </div>
+
+      <!-- Monthly Rent Input -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">attach_money</i>
+          <input id="monthly_rent" type="number" class="validate" required>
+          <label for="monthly_rent">Monthly Rent</label>
+        </div>
+      </div>
+
+      <!-- Due Date Calendar -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">event</i>
+          <input id="rent_due_date" type="text" class="datepicker" required>
+          <label for="rent_due_date">Rent Due Date</label>
+        </div>
+      </div>
+
+      <!-- Tenants Section -->
+      <div class="row">
+        <div class="col s12">
+          <h5>Tenants</h5>
+          <div id="tenants-container">
+            <!-- Template for tenant row -->
+            <div class="tenant-row">
+              <div class="input-field col s6">
+                <select class="tenant-select" name="tenants[]" required>
+                  <option value="" disabled selected>Choose tenant</option>
+                  <% if (users && users.length > 0) { %>
+                    <% users.forEach(function(user) { %>
+                      <option value="<%= user.userID %>">
+                        <%= user.firstName %> <%= user.lastName %>
+                      </option>
+                    <% }); %>
+                  <% } %>
+                </select>
+                <label>Select Tenant</label>
+              </div>
+              <div class="input-field col s4">
+                <input type="number" class="rent-percentage" min="0" max="100">
+                <label>Rent Percentage</label>
+              </div>
+              <div class="col s2">
+                <a class="btn-floating btn-small waves-effect waves-light red remove-tenant">
+                  <i class="material-icons">remove</i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <!-- Add Tenant Button -->
+          <div class="row">
+            <div class="col s12 center-align">
+              <a class="btn-floating btn-small waves-effect waves-light green" id="add-tenant">
+                <i class="material-icons">add</i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add these fields to your form -->
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">location_on</i>
+          <input id="st_address" name="st_address" type="text" class="validate" required>
+          <label for="st_address">Street Address</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-field col s6">
+          <input id="city" name="city" type="text" class="validate" required>
+          <label for="city">City</label>
+        </div>
+        <div class="input-field col s2">
+          <input id="state" name="state" type="text" class="validate" maxlength="2" required>
+          <label for="state">State</label>
+        </div>
+        <div class="input-field col s4">
+          <input id="zip" name="zip" type="number" class="validate" required>
+          <label for="zip">ZIP Code</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="input-field col s12">
+          <select id="house_type" name="house_type" required>
+            <option value="" disabled selected>Choose house type</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+            <option value="condo">Condo</option>
+            <option value="other">Other</option>
+          </select>
+          <label>House Type</label>
+        </div>
+      </div>
+
+      <!-- Bottom Buttons -->
+      <div class="row">
+        <div class="col s6">
+          <button class="btn waves-effect waves-light" type="button" id="edit-btn">
+            Edit
+            <i class="material-icons right">edit</i>
+          </button>
+        </div>
+        <div class="col s6 right-align">
+          <button class="btn-large waves-effect waves-light" type="submit">
+            Create House
+            <i class="material-icons right">add_circle</i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Materialize JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all Materialize components
+    M.AutoInit();
+
+    // Initialize datepicker
+    var datepicker = document.querySelector('.datepicker');
+    M.Datepicker.init(datepicker, {
+      format: 'yyyy-mm-dd',
+      autoClose: true
+    });
+
+    // Initialize select
+    var selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+
+    // Add tenant button functionality
+    document.getElementById('add-tenant').addEventListener('click', function() {
+      const container = document.getElementById('tenants-container');
+      const template = container.querySelector('.tenant-row').cloneNode(true);
+      
+      // Reset values in the cloned row
+      template.querySelector('select').value = '';
+      template.querySelector('input').value = '';
+      
+      // Re-initialize Materialize select in the new row
+      container.appendChild(template);
+      M.FormSelect.init(template.querySelector('select'));
+
+      // Add remove functionality to new row
+      template.querySelector('.remove-tenant').addEventListener('click', function() {
+        template.remove();
+      });
+    });
+
+    // Initialize remove buttons
+    document.querySelectorAll('.remove-tenant').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.tenant-row').remove();
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
