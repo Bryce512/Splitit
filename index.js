@@ -46,25 +46,17 @@ app.post('/sendLogin', (req,res) => {
 })
 
 
-// Serve the login page (login.ejs)
-app.get('/newHouse', (req, res) => {
-  res.render('newHouse');  // Renders 'login.ejs' file
-});
-
-
-
 // Route to display the new house form
-app.get('/newHouse', (req, res) => {
-  // Get list of potential users from your users table
-  knex('users')
-    .select('user_id', 'first_name', 'last_name')  // Updated column names
-    .then(users => {
-      res.render('newHouse', { users: users });
-    })
-    .catch(err => {
-      console.error('Error fetching users:', err);
-      res.render('newHouse', { users: [], error: 'Failed to load users' });
-    });
+app.get('/newHouse', async (req, res) => {
+  try {
+    const users = await knex('users')
+      .select('user_id', 'first_name', 'last_name');
+    
+    res.render('newHouse', { users: users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.render('newHouse', { users: [] }); // Provide empty array as fallback
+  }
 });
 
 // Route to handle the house creation form submission
