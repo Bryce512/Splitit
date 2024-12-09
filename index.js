@@ -218,5 +218,10 @@ app.get('/about', (req, res) => {
   res.render('about');
 });
 
+// Contact page route
+app.get('/contact', (req, res) => {
+  res.render('contact');
+});
+
 // port number, (parameters) => what you want it to do.
 app.listen(PORT, () => console.log('Server started on port ' + PORT));
