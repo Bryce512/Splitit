@@ -12,7 +12,7 @@ const knex = require("knex") ({
   host : process.env.DB_HOST || "192.168.86.3",
   user : process.env.DB_USER || "admins",
   password : process.env.DB_PASSWORD || "ISAdmins",
-  database : process.env.DB_NAME || "splitit_db",
+  database : process.env.DB_NAME || "postgres",
   port : process.env.RDS_PORT || 5432,
   ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : false  // Fixed line
 }
@@ -37,20 +37,15 @@ app.get('/', (req, res) => {
 
 // Serve the login page (login.ejs)
 app.get('/login', (req, res) => {
-  res.render('login');  // Renders 'login.ejs' file
+  res.render('login', {
+    users: []
+  });  // Renders 'login.ejs' file
 });
 
 //Submit Login Request
 app.post('/sendLogin', (req,res) => {
   res.redirect('/');
 })
-
-
-// Serve the login page (login.ejs)
-app.get('/newHouse', (req, res) => {
-  res.render('newHouse');  // Renders 'login.ejs' file
-});
-
 
 
 // Route to display the new house form
