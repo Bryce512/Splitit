@@ -9,10 +9,10 @@ app.use(express.urlencoded( {extended: true} ));
 const knex = require("knex") ({
   client : "pg",
   connection : {
-  host : process.env.RDS_HOSTNAME || "awseb-e-jscipcpyz9-stack-awsebrdsdatabase-roat50cnm4ii.c7kgaykw042g.us-east-2.rds.amazonaws.com",
-  user : process.env.RDS_USERNAME || "dev-admins",
-  password : process.env.RDS_PASSWORD || "Password123",
-  database : process.env.RDS_DB_NAME || "ebdb",
+  host : process.env.DB_HOST || "192.168.86.3",
+  user : process.env.DB_USER || "admins",
+  password : process.env.DB_PASSWORD || "ISAdmins",
+  database : process.env.DB_NAME || "splitit_db",
   port : process.env.RDS_PORT || 5432,
   ssl: process.env.DB_SSL ? { rejectUnauthorized: false } : false  // Fixed line
 }
@@ -24,15 +24,15 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, 'public')));
 // Define route for home page
 app.get('/', (req, res) => {
-  knex('users')
-    .select(
-      'users.userID',
-      'users.userFirstName'
-    )
-    .then(pokemon => {
-      // Render the index.ejs template and pass the data
-      res.render('home', { pokemon });
-    })
+  res.render('home')
+  // knex('users')
+  //   .select(
+  //     'users.userID',
+  //     'users.userFirstName'
+  //   )
+  //   .then(pokemon => {
+  //     // Render the index.);
+  //   })
 });
 
 // Serve the login page (login.ejs)
