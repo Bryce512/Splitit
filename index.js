@@ -166,5 +166,52 @@ app.post('/createProfile', async (req, res) => {
   }
 });
 
+// Route to display the new split form
+app.get('/newSplit', async (req, res) => {
+  try {
+    // Get houses where the current user is the owner
+    const houses = await knex('houses')
+      .select('houses.*')
+      .where('owner_id', req.user.user_id)  // You'll need to implement user sessions
+      .orWhereIn('house_id', function() {
+        this.select('house_id')
+          .from('user_houses')
+          .where('user_id', req.user.user_id);
+      });
+
+    res.render('newSplit', { 
+      houses: houses,
+      error: null 
+    });
+  } catch (err) {
+    console.error('Error fetching houses:', err);
+    res.render('newSplit', { 
+      houses: [],
+      error: 'Failed to load houses' 
+    });
+  }
+});
+
+// Route to handle split creation
+app.post('/createSplit', async (req, res) => {
+  try {
+    const [splitId] = await knex('split').insert({
+      creator_id: req.user.user_id,  // You'll need to implement user sessions
+      house_id: req.body.house_id,
+      creator_pays: true,  // Default value
+      calc_method: true,   // Default value
+      total_amount: req.body.total_amount,
+      date_due: req.body.date_due,
+      recurring: false,    // For one-time splits
+      frequency: null      // For one-time splits
+    }).returning('split_id');
+
+    res.redirect('/dashboard');  // Or wherever you want to redirect after success
+  } catch (error) {
+    console.error('Error creating split:', error);
+    res.redirect('/newSplit?error=Failed to create split');
+  }
+});
+
 // port number, (parameters) => what you want it to do.
 app.listen(PORT, () => console.log('Server started on port ' + PORT));
