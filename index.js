@@ -45,8 +45,13 @@ app.post('/sendLogin', (req,res) => {
   res.redirect('/');
 })
 
-// Serve static files (e.g., CSS) if needed
-app.use(express.static('public'));
+
+// Serve the login page (login.ejs)
+app.get('/newHouse', (req, res) => {
+  res.render('newHouse');  // Renders 'login.ejs' file
+});
+
+
 
 
 // port number, (parameters) => what you want it to do.
