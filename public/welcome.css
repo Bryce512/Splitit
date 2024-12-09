@@ -1,0 +1,429 @@
+:root {
+  --main-color: #4db6ac;
+  --secondary-color: #cee9e5;
+  --text-main: #eff8f6;
+  --dark-text: #333;
+  --light-grey: #f4f7f6;
+  --hover-color: #45a049;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--light-grey);
+  color: var(--dark-text);
+  margin: 0;
+  padding: 0;
+}
+
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--main-color);
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar logo */
+.navbar .logo {
+  font-size: 1.8rem;
+  color: var(--text-main);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-decoration: none;
+}
+
+/* Navbar links */
+.navbar .nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar .nav-links li {
+  position: relative;
+}
+
+/* Navbar link styles */
+.navbar .nav-links a {
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  transition: color 0.3s, transform 0.3s;
+  display: block;
+  border-radius: 5px;
+}
+
+.navbar .nav-links a:hover {
+  color: var(--dark-text);
+  background-color: var(--secondary-color);
+  transform: scale(1.05);
+}
+
+/* Active link styles */
+.navbar .nav-links a.active {
+  color: var(--main-color);
+  background-color: var(--light-grey);
+}
+
+/* Mobile menu button */
+.navbar .menu-btn {
+  display: none;
+  background-color: var(--main-color);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navbar .menu-btn:hover {
+  background-color: var(--hover-color);
+}
+
+/* Mobile navigation */
+.navbar .mobile-nav {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--main-color);
+  padding: 20px;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar .mobile-nav a {
+  color: var(--text-main);
+  font-size: 1.2rem;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.navbar .mobile-nav a:hover {
+  background-color: var(--hover-color);
+}
+
+/* Mobile view: Show menu button and hide desktop navigation */
+@media (max-width: 768px) {
+  .navbar .nav-links {
+    display: none;
+  }
+
+  .navbar .menu-btn {
+    display: block;
+  }
+
+  .navbar .mobile-nav {
+    display: flex;
+  }
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 40px;
+  background-color: var(--main-color);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 20px auto;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  line-height: 1.6;
+  color: #fff;
+}
+
+.cta-button {
+  background-color: var(--main-color);
+  color: white;
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--hover-color);
+}
+
+/* Features Section */
+.features-section {
+  display: flex;
+  justify-content: space-around;
+  padding: 50px 10%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 30px 0;
+  animation: slideUp 1s ease-out;
+}
+
+.feature-item {
+  text-align: center;
+  width: 30%;
+  padding: 20px;
+}
+
+.feature-item h3 {
+  font-size: 1.5rem;
+  color: var(--main-color);
+}
+
+.feature-item p {
+  font-size: 1rem;
+  color: var(--dark-text);
+  line-height: 1.5;
+}
+
+/* Call to Action Banner */
+.cta-banner {
+  background-color: var(--main-color);
+  color: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 8px;
+  margin: 40px 10%;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+.cta-banner h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.cta-banner .cta-button {
+  font-size: 1.2rem;
+  padding: 15px 30px;
+}
+
+/* Footer Styling */
+.page-footer {
+  background-color: var(--main-color);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.page-footer .footer-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.page-footer .footer-links {
+  margin-top: 10px;
+}
+
+.page-footer .footer-links a {
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.page-footer .footer-links a:hover {
+  color: var(--hover-color);
+}
+
+/* Modal Styles (for optional future use) */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.modal-body {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  text-align: center;
+}
+
+.modal-footer .close-btn {
+  background-color: var(--main-color);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-footer .close-btn:hover {
+  background-color: var(--hover-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form and Login Form */
+.loginForm {
+  background-color: var(--secondary-color);
+  display: flex;
+  flex-direction: column;
+  padding: 4% 8%;
+  border: 1px solid var(--secondary-color);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.loginForm div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginForm label,
+.loginForm input {
+  display: flex;
+  align-self: flex-start; /* Aligns the label to the left within its flex container */
+  text-align: left; /* Aligns the text within the label to the left */
+  width: 200px;
+}
+
+/* Editable Row Styling (No Changes to Existing Styles) */
+.editable-row {
+  background-color: white;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.editable-row:hover {
+  background-color: #f0f0f0;  /* Light grey on hover */
+}
+
+.editable-row.selected {
+  background-color: #b0e8e3;  /* Light teal when selected */
+}
+
+/* Collection Styling */
+.collection {
+  width: 100%;
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: grey;
+}
+
+/* Ensure each collection item also spans the full width */
+.collection-item {
+  width: 100%;
+  border-radius: 0px;
+  box-sizing: border-box; /* Ensures padding does not affect width */
+}
+
+/* Input and Button Styles */
+input[type="text"] {
+  padding: 12px;
+  width: 100%;
+  max-width: 300px;
+  margin: 10px auto;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+button {
+  background-color: var(--main-color);
+  color: white;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--hover-color);
+}
+
+/* Footer Section */
+.page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-footer container {
+  padding: 40;
+}
+
+.container {
+  padding-right: 60px; /* Add space for the avatar */
+}

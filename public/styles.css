@@ -14,14 +14,14 @@
 
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  vertical-align: middle;
+  width: 45px;         /* Adjust size as needed */
+  height: 45px;
+  border-radius: 50%;  /* Makes the image circular */
+  margin-left: 10px;   /* Adds a little space from the other links */
 }
 
 .avatar-large {
-  display: inline-block;
+  display: block; /* Ensures it's displayed in the navbar */
 }
 
 .avatar-mobile {
@@ -42,17 +42,6 @@
 
 .header-text {
   border-bottom: 1px solid #000000;
-}
-
-/* Hover effect for table rows */
-.editable-row:hover {
-  background-color: #f0f0f0;  /* Light grey on hover */
-  cursor: pointer;
-}
-
-/* Highlight the selected row */
-.editable-row.selected {
-  background-color: #b0e8e3;  /* Light teal when selected */
 }
 
 /* Ensure the collection takes up the full width */
@@ -141,8 +130,4 @@ button:hover {
 
 .page-footer container {
   padding: 40;
-}
-
-.container {
-  padding-right: 60px; /* Add space for the avatar */
 }
