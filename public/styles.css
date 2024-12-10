@@ -14,14 +14,14 @@
 
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  vertical-align: middle;
+  width: 45px;         /* Adjust size as needed */
+  height: 45px;
+  border-radius: 50%;  /* Makes the image circular */
+  margin-left: 10px;   /* Adds a little space from the other links */
 }
 
 .avatar-large {
-  display: inline-block;
+  display: block; /* Ensures it's displayed in the navbar */
 }
 
 .avatar-mobile {
@@ -44,6 +44,23 @@
   border-bottom: 1px solid #000000;
 }
 
+/* Ensure the collection takes up the full width */
+.collection {
+  width: 100%;
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  /* border-radius: 5px;
+  border-width: 1px;
+  border-color: grey; */
+}
+
+/* Ensure each collection item also spans the full width */
+.collection-item {
+  width: 100%;
+  border-radius: 0px;
+  box-sizing: border-box; /* Ensures padding does not affect width */
+}
+
 /* Hover effect for table rows */
 .editable-row:hover {
   background-color: #f0f0f0;  /* Light grey on hover */
@@ -53,23 +70,6 @@
 /* Highlight the selected row */
 .editable-row.selected {
   background-color: #b0e8e3;  /* Light teal when selected */
-}
-
-/* Ensure the collection takes up the full width */
-.collection {
-  width: 100%;
-  margin: 0; /* Remove any default margins */
-  padding: 0; /* Remove any default padding */
-  border-radius: 5px;
-  border-width: 1px;
-  border-color: grey;
-}
-
-/* Ensure each collection item also spans the full width */
-.collection-item {
-  width: 100%;
-  border-radius: 0px;
-  box-sizing: border-box; /* Ensures padding does not affect width */
 }
 
 * Style for input and button */
@@ -143,6 +143,38 @@ button:hover {
   padding: 40;
 }
 
-.container {
-  padding-right: 60px; /* Add space for the avatar */
+/* Initially hide the modal */
+.modal.hidden {
+  display: none;
+}
+
+/* When the modal is visible */
+.modal.visible {
+  display: block; /* Or any other styling that makes the modal appear */
+}
+
+/* Overlay visibility */
+.overlay.visible {
+  display: block; /* Or a different styling to make the overlay appear */
+}
+
+/* Other overlay and modal styles */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* Hidden by default */
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  display: none; /* Hidden by default */
 }

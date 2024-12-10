@@ -1,92 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SplitIt-Home</title>
-  
-  <!-- Materialize CSS CDN -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-  
-  <!-- Custom CSS (optional) -->
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
+<%- include('components/navbar') %>
 
-<!-- Navbar -->
-<nav class="nav-wrapper main_Color">
-  <div class="container" style="position: relative;">
-    <a href="/" class="brand-logo">SplitIt</a>
-    <ul class="right hide-on-med-and-down">
-      <li><a href="/">Home</a></li>
-      <li><a href="/newHouse">New House</a></li>
-      <li><a href="/newProfile">New Profile</a></li>
-      <li><a href="/newSplit">New Split</a></li>
-      <li><a href="/about">About</a></li>
-      <li><a href="/contact">Contact</a></li>
-    </ul>
-    <a href="#" data-target="mobile-nav" class="sidenav-trigger left hide-on-large-only">
-      <i class="material-icons">&#9776</i>
-    </a>
-    <div style="position: absolute; right: -50px; top: -1px;">
-      <a href="/profile">
-        <img src="/user-profile-icon.webp" alt="User Avatar" class="avatar">
-      </a>
-    </div>
-  </div>
-</nav>
-
-<!-- SideNav for Mobile Screens -->
-<ul class="sidenav" id="mobile-nav">
-  <li><a href="/">Home</a></li>
-  <li><a href="/newHouse">New House</a></li>
-  <li><a href="/newProfile">New Profile</a></li>
-  <li><a href="/newSplit">New Split</a></li>
-  <li><a href="/about">About</a></li>
-  <li><a href="/contact">Contact</a></li>
-</ul>
 
 
   <div class="container">
     <!-- Page Header -->
-    <h1 class="center-align">Welcome to SplitIt</h1>
-    <h5 class="center-align grey-text">Your all-in-one bill splitting tool</h5>
+    <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
     <br>
-
-    <!-- Button -->
-    <div class="center-align">
-      <a href="/login" class="waves-effect waves-light btn"><span class="txt_MainColor">Login</span></a>
-    </div>
 
     <div class="container">
       <!-- Recent Splits Section -->
       <h2 class="header-text ">Recent Splits</h2>
-      <ul class="collection" >
-        <li class="collection-item avatar editable-row">
-          <img src="images/yuna.jpg" alt="" class="circle">
-          <span class="title">Michael Backman</span>
-          <p>Second Line</p>
-          <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-        </li>
-        <li class="collection-item avatar editable-row">
-          <i class="material-icons circle">folder</i>
-          <span class="title">Logan Spencer</span>
-          <p>Another Second Line</p>
-          <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-        </li>
-            <li class="collection-item avatar editable-row">
-              <i class="material-icons circle green">insert_chart</i>
-              <span class="title">Lara Justus</span>
-              <p>Second Line</p>
-              <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-            </li>
-            <li class="collection-item avatar editable-row">
-              <i class="material-icons circle red">play_arrow</i>
-              <span class="title">Bryce Whitworth</span>
-              <p>Second Line</p>
-              <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-            </li>
+
+
+      <ul class="collection">
+        <% payments.forEach(payment => { %>
+          <div>
+            <div class="editable-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <li class="collection-item editable-row" data-id="<%= user.user_id %>" payment-id="<%= payment.pmt_id %>" >
+                <span class="title"><%= user.first_name %> <%= user.last_name %></span>
+                <p><%= payment.status %></p>
+              </li>
+              <!-- Right-aligned price -->
+              <div class="secondary-content" style="text-align: right;">
+                <i class="material-icons" style="display: inline-block; text-align: right; margin-right: 20px;"><%= payment.amount_due %></i>
+              </div>
+            </div>
+          </div>
+        <% }) %>
       </ul>
+      
     </div>
     
     
@@ -102,7 +44,9 @@
         They can be scheduled or a one time split. 
         Everything is handled from the security of Venmo Transactions.
       </h6>
+      <br>
     </div>
+    <div id="overlay" class="overlay hidden"></div>
   </footer>
 
   <!-- Materialize JavaScript (for interactive components) -->
@@ -116,3 +60,30 @@
   </script>
 </body>
 </html>
+
+
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <h4 id="modalTitle">Add Admin</h4>
+    <form action="/add-admin" method="POST">
+      <select style="display: block;" name="add_entity_name" id="add-admin-dropdown" required>
+        <option value="">Select Team Member</option>
+        <% teamMembers.forEach(function(member) { %>
+          <option value="<%= member.contact_id %>">
+            <%= member.last_name %>, <%= member.first_name %>
+          </option>
+        <% }); %>
+      </select>
+      <div class="input-field">
+        <input id="add-entity-username" type="text" name="username" placeholder="Username" required>
+      </div>
+      <div class="input-field">
+        <input id="add-entity-password" type="text" name="password" placeholder="Password" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class=" adminModalClose btn grey">Cancel</button>
+        <button type="submit" class="btn green">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
