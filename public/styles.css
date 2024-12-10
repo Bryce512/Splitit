@@ -142,3 +142,39 @@ button:hover {
 .page-footer container {
   padding: 40;
 }
+
+/* Initially hide the modal */
+.modal.hidden {
+  display: none;
+}
+
+/* When the modal is visible */
+.modal.visible {
+  display: block; /* Or any other styling that makes the modal appear */
+}
+
+/* Overlay visibility */
+.overlay.visible {
+  display: block; /* Or a different styling to make the overlay appear */
+}
+
+/* Other overlay and modal styles */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* Hidden by default */
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  display: none; /* Hidden by default */
+}

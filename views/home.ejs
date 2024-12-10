@@ -16,7 +16,7 @@
         <% payments.forEach(payment => { %>
           <div>
             <div class="editable-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-              <li class="collection-item editable-row" data-id="<%= user.user_id %>">
+              <li class="collection-item editable-row" data-id="<%= user.user_id %>" payment-id="<%= payment.pmt_id %>" >
                 <span class="title"><%= user.first_name %> <%= user.last_name %></span>
                 <p><%= payment.status %></p>
               </li>
@@ -46,6 +46,7 @@
       </h6>
       <br>
     </div>
+    <div id="overlay" class="overlay hidden"></div>
   </footer>
 
   <!-- Materialize JavaScript (for interactive components) -->
@@ -59,3 +60,30 @@
   </script>
 </body>
 </html>
+
+
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <h4 id="modalTitle">Add Admin</h4>
+    <form action="/add-admin" method="POST">
+      <select style="display: block;" name="add_entity_name" id="add-admin-dropdown" required>
+        <option value="">Select Team Member</option>
+        <% teamMembers.forEach(function(member) { %>
+          <option value="<%= member.contact_id %>">
+            <%= member.last_name %>, <%= member.first_name %>
+          </option>
+        <% }); %>
+      </select>
+      <div class="input-field">
+        <input id="add-entity-username" type="text" name="username" placeholder="Username" required>
+      </div>
+      <div class="input-field">
+        <input id="add-entity-password" type="text" name="password" placeholder="Password" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class=" adminModalClose btn grey">Cancel</button>
+        <button type="submit" class="btn green">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
