@@ -318,5 +318,242 @@ app.get('/contact', (req, res) => {
   res.render('contact');
 });
 
+// Add this delete route after your other routes
+app.delete('/deleteProfile/:userId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Start a transaction since we'll be deleting from multiple tables
+    await knex.transaction(async (trx) => {
+      const userId = req.params.userId;
+
+      // First delete from user_houses table (foreign key relationship)
+      await trx('user_houses')
+        .where('user_id', userId)
+        .del();
+
+      // Delete from payment table
+      await trx('payment')
+        .where('user_id', userId)
+        .del();
+
+      // Delete from split table where user is creator
+      await trx('split')
+        .where('creator_id', userId)
+        .del();
+
+      // Finally delete the user
+      const deletedCount = await trx('users')
+        .where('user_id', userId)
+        .del();
+
+      if (deletedCount === 0) {
+        throw new Error('User not found');
+      }
+    });
+
+    // If user deleted themselves, log them out
+    if (user.user_id === parseInt(req.params.userId)) {
+      authorized = false;
+      return res.json({ message: 'Profile deleted successfully', redirect: '/login' });
+    }
+
+    res.json({ message: 'Profile deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete profile',
+      details: error.message 
+    });
+  }
+});
+
+// Delete routes for various entities
+// Add these after your other routes
+
+// Delete House
+app.delete('/deleteHouse/:houseId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const houseId = req.params.houseId;
+
+      // Check if user is house owner
+      const house = await trx('houses')
+        .where('house_id', houseId)
+        .andWhere('owner_id', user.user_id)
+        .first();
+
+      if (!house) {
+        throw new Error('House not found or you are not the owner');
+      }
+
+      // Delete related records in order
+      await trx('payment')
+        .whereIn('split_id', function() {
+          this.select('split_id')
+            .from('split')
+            .where('house_id', houseId);
+        })
+        .del();
+
+      await trx('split')
+        .where('house_id', houseId)
+        .del();
+
+      await trx('user_houses')
+        .where('house_id', houseId)
+        .del();
+
+      await trx('houses')
+        .where('house_id', houseId)
+        .del();
+    });
+
+    res.json({ message: 'House deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting house:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete house',
+      details: error.message 
+    });
+  }
+});
+
+// Delete Split
+app.delete('/deleteSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const splitId = req.params.splitId;
+
+      // Check if user is split creator
+      const split = await trx('split')
+        .where('split_id', splitId)
+        .andWhere('creator_id', user.user_id)
+        .first();
+
+      if (!split) {
+        throw new Error('Split not found or you are not the creator');
+      }
+
+      // Delete payments first
+      await trx('payment')
+        .where('split_id', splitId)
+        .del();
+
+      // Delete the split
+      await trx('split')
+        .where('split_id', splitId)
+        .del();
+    });
+
+    res.json({ message: 'Split deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting split:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete split',
+      details: error.message 
+    });
+  }
+});
+
+// Delete Payment
+app.delete('/deletePayment/:paymentId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const paymentId = req.params.paymentId;
+
+    // Check if user owns this payment
+    const payment = await knex('payment')
+      .where('pmt_id', paymentId)
+      .andWhere('user_id', user.user_id)
+      .first();
+
+    if (!payment) {
+      throw new Error('Payment not found or you are not authorized');
+    }
+
+    await knex('payment')
+      .where('pmt_id', paymentId)
+      .del();
+
+    res.json({ message: 'Payment deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete payment',
+      details: error.message 
+    });
+  }
+});
+
+// Delete User from House
+app.delete('/leaveHouse/:houseId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const houseId = req.params.houseId;
+
+      // Check if user is in this house
+      const userHouse = await trx('user_houses')
+        .where({
+          house_id: houseId,
+          user_id: user.user_id
+        })
+        .first();
+
+      if (!userHouse) {
+        throw new Error('You are not a member of this house');
+      }
+
+      // Delete user's payments for this house's splits
+      await trx('payment')
+        .where('user_id', user.user_id)
+        .whereIn('split_id', function() {
+          this.select('split_id')
+            .from('split')
+            .where('house_id', houseId);
+        })
+        .del();
+
+      // Remove user from house
+      await trx('user_houses')
+        .where({
+          house_id: houseId,
+          user_id: user.user_id
+        })
+        .del();
+    });
+
+    res.json({ message: 'Successfully left the house' });
+
+  } catch (error) {
+    console.error('Error leaving house:', error);
+    res.status(500).json({ 
+      error: 'Failed to leave house',
+      details: error.message 
+    });
+  }
+});
+
 // port number, (parameters) => what you want it to do.
 app.listen(PORT, () => console.log('Server started on port ' + PORT));

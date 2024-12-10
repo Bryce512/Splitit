@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
   console.log("DOM fully loaded and parsed");
   overlay = document.getElementById('overlay');
@@ -95,3 +94,108 @@ document.querySelectorAll('.editable-row').forEach(row => {
     row.classList.remove('hover');
   });
 });
+
+function deleteProfile(userId) {
+  if (confirm('Are you sure you want to delete your profile? This action cannot be undone.')) {
+    fetch(`/deleteProfile/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      } else {
+        alert(data.message);
+        // Optionally refresh the page or update the UI
+        window.location.reload();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to delete profile. Please try again.');
+    });
+  }
+}
+
+function deleteHouse(houseId) {
+  if (confirm('Are you sure you want to delete this house? This will delete all associated splits and payments.')) {
+    fetch(`/deleteHouse/${houseId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to delete house. Please try again.');
+    });
+  }
+}
+
+function deleteSplit(splitId) {
+  if (confirm('Are you sure you want to delete this split? This will delete all associated payments.')) {
+    fetch(`/deleteSplit/${splitId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to delete split. Please try again.');
+    });
+  }
+}
+
+function deletePayment(paymentId) {
+  if (confirm('Are you sure you want to delete this payment?')) {
+    fetch(`/deletePayment/${paymentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to delete payment. Please try again.');
+    });
+  }
+}
+
+function leaveHouse(houseId) {
+  if (confirm('Are you sure you want to leave this house? This will remove all your associated payments.')) {
+    fetch(`/leaveHouse/${houseId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to leave house. Please try again.');
+    });
+  }
+}
