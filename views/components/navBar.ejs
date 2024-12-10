@@ -7,6 +7,7 @@
   
   <!-- Materialize CSS CDN -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <!-- Custom CSS (optional) -->
   <link rel="stylesheet" href="/styles.css">
@@ -19,17 +20,26 @@
     <a href="/" class="brand-logo">SplitIt</a>
     <ul class="right hide-on-med-and-down">
       <li><a href="/home">Home</a></li>
-      <li><a href="/newHouse">New House</a></li>
-      <li><a href="/newProfile">New Profile</a></li>
-      <li><a href="/newSplit">New Split</a></li>
-      <li><a href="/about">About</a></li>
-      <li><a href="/contact">Contact</a></li>
-      <li><a href="/logout">Log Out</a></li>
+      
+      <!-- Dropdown Trigger for New items -->
+      <li><a class="dropdown-trigger"   href="#!" data-target="dropdown-new" style="height: 64px;">New  <i class="fas fa-chevron-down" style="font-size: small;"></i></a></li>
 
+      <!-- Dropdown Structure -->
+      <ul id="dropdown-new" class="dropdown-content" style="position: relative; top: 45px;" >
+        <li><a href="/newHouse">New House</a></li>
+        <li><a href="/newProfile">New Profile</a></li>
+        <li><a href="/newSplit">New Split</a></li>
+      </ul>
+      
+      <li><a href="/logout">Log Out</a></li>
     </ul>
+    
+    <!-- Mobile Navbar Trigger -->
     <a href="#" data-target="mobile-nav" class="sidenav-trigger left hide-on-large-only">
-      <i class="material-icons">&#9776</i>
+      <i class="material-icons">&#9776;</i>
     </a>
+    
+    <!-- User Profile Icon -->
     <div style="position: absolute; right: -50px; top: -1px;">
       <a href="/profile">
         <img src="/user-profile-icon.webp" alt="User Avatar" class="avatar">
@@ -46,7 +56,18 @@
   <li><a href="/newSplit">New Split</a></li>
   <li><a href="/about">About</a></li>
   <li><a href="/contact">Contact</a></li>
-  <li>
-
-  </li>
 </ul>
+
+<!-- Materialize JS CDN (Needed for dropdowns and other components) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+  // Initialize the dropdown on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dropdowns
+    var elems = document.querySelectorAll('.dropdown-trigger');
+    var instances = M.Dropdown.init(elems);
+  });
+</script>
+
+</body>
+</html>

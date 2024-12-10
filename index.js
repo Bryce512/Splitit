@@ -238,8 +238,10 @@ app.get('/newSplit', async (req, res) => {
               .where('user_id', req.user.user_id);
           });
 
+        console.log('Houses passed to template:', houses);
+
         res.render('newSplit', { 
-          houses: houses,
+          houses: houses || [],
           error: null 
         });
     
@@ -264,8 +266,6 @@ app.get('/newSplit', async (req, res) => {
     res.redirect('/login')
   }
   
-  console.log('Houses passed to template:', houses);
-
 });
 
 // Route to handle split creation

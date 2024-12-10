@@ -9,7 +9,6 @@
       <!-- House Name Input -->
       <div class="row">
         <div class="input-field col s12">
-          <i class="material-icons prefix">home</i>
           <input id="house_name" type="text" class="validate" required>
           <label for="house_name">House Name</label>
         </div>
@@ -18,7 +17,6 @@
       <!-- Monthly Rent Input -->
       <div class="row">
         <div class="input-field col s12">
-          <i class="material-icons prefix">attach_money</i>
           <input id="monthly_rent" type="number" class="validate" required>
           <label for="monthly_rent">Monthly Rent</label>
         </div>
@@ -27,68 +25,48 @@
       <!-- Due Date Calendar -->
       <div class="row">
         <div class="input-field col s12">
-          <i class="material-icons prefix">event</i>
           <input id="rent_due_date" type="text" class="datepicker" required>
           <label for="rent_due_date">Rent Due Date</label>
         </div>
       </div>
 
       <!-- Tenants Section -->
-      <div class="row">
-        <div class="col s12">
-          <h5>Tenants</h5>
-          <div id="tenants-container">
-            <!-- Template for tenant row -->
-            <div class="tenant-row">
-              <div class="input-field col s6">
-                <select class="tenant-select" name="tenants[]" required>
-                  <option value="" disabled selected>Choose tenant</option>
-                  <% if (users && users.length > 0) { %>
-                    <% users.forEach(function(user) { %>
-                      <option value="<%= user.user_id %>">
-                        <%= user.first_name %> <%= user.last_name %>
-                      </option>
-                    <% }); %>
-                  <% } %>
-
-                  <% if (typeof users !== 'undefined' && users.length > 0) { %>
-                    <% users.forEach(function(user) { %>
-                      <option value="<%= user.user_id %>">
-                        <%= user.first_name %> <%= user.last_name %>
-                      </option>
-                    <% }); %>
-                  <% } else { %>
-                    <option value="" disabled>No users available</option>
-                  <% } %>
-                </select>
-                <label>Select Tenant</label>
-              </div>
-              <div class="input-field col s4">
-                <input type="number" class="rent-percentage" min="0" max="100">
-                <label>Rent Percentage</label>
-              </div>
-              <div class="col s2">
-                <a class="btn-floating btn-small waves-effect waves-light red remove-tenant">
-                  <i class="material-icons">remove</i>
-                </a>
-              </div>
-            </div>
+      <div id="tenant-list">
+        <!-- Tenant Row Template (will be cloned dynamically) -->
+        <div class="tenant-row" style="display: flex; flex-direction: row; gap: 10px;">
+          <div class="input-field" style="flex: 2;">
+            <select class="tenant-select" name="tenants[]" required>
+              <option value="" disabled selected>Choose tenant</option>
+              <% if (users && users.length > 0) { %>
+                <% users.forEach(function(user) { %>
+                  <option value="<%= user.user_id %>">
+                    <%= user.first_name %> <%= user.last_name %>
+                  </option>
+                <% }); %>
+              <% } %>
+              <option value="" disabled>No users available</option>
+            </select>
+            <label>Select Tenant</label>
           </div>
-          <!-- Add Tenant Button -->
-          <div class="row">
-            <div class="col s12 center-align">
-              <a class="btn-floating btn-small waves-effect waves-light green" id="add-tenant">
-                <i class="material-icons">add</i>
-              </a>
-            </div>
+          <div class="input-field" style="flex: 1;">
+            <input type="number" class="rent-percentage" min="0" max="100">
+            <label>Rent Percentage</label>
+          </div>
+          <div style="flex-shrink: 0;">
+            <a class="btn-floating btn-small waves-effect waves-light red remove-tenant">
+              <i class="fas fa-minus"></i>
+            </a>
           </div>
         </div>
       </div>
+      
+      <!-- Button to add a new row -->
+      <button id="add-tenant">Add Tenant</button>
+      
 
       <!-- Add these fields to your form -->
       <div class="row">
         <div class="input-field col s12">
-          <i class="material-icons prefix">location_on</i>
           <input id="st_address" name="st_address" type="text" class="validate" required>
           <label for="st_address">Street Address</label>
         </div>
@@ -127,13 +105,12 @@
         <div class="col s6">
           <button class="btn waves-effect waves-light" type="button" id="edit-btn">
             Edit
-            <i class="material-icons right">edit</i>
           </button>
         </div>
         <div class="col s6 right-align">
           <button class="btn-large waves-effect waves-light" type="submit">
             Create House
-            <i class="material-icons right">add_circle</i>
+            <i class="fas fa-plus"></i>
           </button>
         </div>
       </div>
@@ -155,28 +132,30 @@
       autoClose: true
     });
 
-    // Initialize select
-    var selects = document.querySelectorAll('select');
-    M.FormSelect.init(selects);
+    // Initialize the Materialize dropdown for any existing select elements
+  const elems = document.querySelectorAll('.tenant-select');
+  M.FormSelect.init(elems);
 
-    // Add tenant button functionality
-    document.getElementById('add-tenant').addEventListener('click', function() {
-      const container = document.getElementById('tenants-container');
-      const template = container.querySelector('.tenant-row').cloneNode(true);
-      
-      // Reset values in the cloned row
-      template.querySelector('select').value = '';
-      template.querySelector('input').value = '';
-      
-      // Re-initialize Materialize select in the new row
-      container.appendChild(template);
-      M.FormSelect.init(template.querySelector('select'));
-
-      // Add remove functionality to new row
-      template.querySelector('.remove-tenant').addEventListener('click', function() {
-        template.remove();
+  // Add tenant row
+  document.getElementById('add-tenant').addEventListener('click', function () {
+    // Clone the tenant row template
+    const tenantRow = document.querySelector('.tenant-row').cloneNode(true);
+    
+    // Append the cloned row to the tenant list
+    document.getElementById('tenant-list').appendChild(tenantRow);
+    
+    // Reinitialize the dropdown in the new row
+    const newElems = tenantRow.querySelectorAll('.tenant-select');
+    M.FormSelect.init(newElems);
+    
+    // Add event listener to remove the tenant row
+    const removeButtons = tenantRow.querySelectorAll('.remove-tenant');
+    removeButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        tenantRow.remove();
       });
     });
+  })
 
     // Initialize remove buttons
     document.querySelectorAll('.remove-tenant').forEach(btn => {
