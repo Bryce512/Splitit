@@ -31,8 +31,14 @@ app.get('/home', async (req, res) => {
   if (authorized && user) {
 
         let payments = await knex('payment')
-                  .select('*')
-                  .where('user_id', user.user_id) // Get all the payment for a specific user
+            .select(  
+              'split.split_name',
+              'payment.amount_due',
+              'payment.status',
+              'split.date_due',
+            )
+            .leftJoin('split', 'split.split_id', '=', 'payment.split_id')
+            .where('payment.user_id', user.user_id); // Get payments for the logged-in user
           res.render('home', {
             user:user,
             payments:payments
