@@ -258,70 +258,70 @@ app.post('/createProfile', async (req, res) => {
 
 // Route to display the new split form
 app.get('/newSplit', async (req, res) => {
-  if (authorized) {
-    try {
-      // Get houses with their splits
-      const houses = await knex('houses')
-        .select(
-          'houses.*',
-          'split.split_id',
-          'split.split_name',
-          'split.total_amount',
-          'split.date_due'
-        )
-        .where('houses.owner_id', user.user_id)
-        .orWhereIn('houses.house_id', function() {
-          this.select('house_id')
-            .from('user_houses')
-            .where('user_id', user.user_id);
-        })
-        .leftJoin('split', 'houses.house_id', 'split.house_id')
-        .orderBy('houses.house_id', 'split.date_due');
+  if (!authorized || !user) {
+    return res.redirect('/login');
+  }
 
-      // Group splits by house
-      const housesWithSplits = houses.reduce((acc, row) => {
-        const house = acc.find(h => h.house_id === row.house_id);
-        if (house) {
-          if (row.split_id) {
-            house.splits = house.splits || [];
-            house.splits.push({
-              split_id: row.split_id,
-              split_name: row.split_name,
-              total_amount: row.total_amount,
-              date_due: row.date_due
-            });
-          }
-        } else {
-          const newHouse = {
-            house_id: row.house_id,
-            st_address: row.st_address,
-            city: row.city,
-            state: row.state,
-            splits: row.split_id ? [{
-              split_id: row.split_id,
-              split_name: row.split_name,
-              total_amount: row.total_amount,
-              date_due: row.date_due
-            }] : []
-          };
-          acc.push(newHouse);
+  try {
+    // Get houses with their splits
+    const houses = await knex('houses')
+      .select(
+        'houses.*',
+        'split.split_id',
+        'split.split_name',
+        'split.total_amount',
+        'split.date_due'
+      )
+      .where('houses.owner_id', user.user_id)
+      .orWhereIn('houses.house_id', function() {
+        this.select('house_id')
+          .from('user_houses')
+          .where('user_id', user.user_id);
+      })
+      .leftJoin('split', 'houses.house_id', 'split.house_id')
+      .orderBy('houses.house_id', 'split.date_due');
+
+    // Group splits by house
+    const housesWithSplits = houses.reduce((acc, row) => {
+      const house = acc.find(h => h.house_id === row.house_id);
+      if (house) {
+        if (row.split_id) {
+          house.splits = house.splits || [];
+          house.splits.push({
+            split_id: row.split_id,
+            split_name: row.split_name,
+            total_amount: row.total_amount,
+            date_due: row.date_due
+          });
         }
-        return acc;
-      }, []);
+      } else {
+        const newHouse = {
+          house_id: row.house_id,
+          st_address: row.st_address,
+          city: row.city,
+          state: row.state,
+          splits: row.split_id ? [{
+            split_id: row.split_id,
+            split_name: row.split_name,
+            total_amount: row.total_amount,
+            date_due: row.date_due
+          }] : []
+        };
+        acc.push(newHouse);
+      }
+      return acc;
+    }, []);
 
-      res.render('newSplit', { 
-        houses: housesWithSplits || [],
-        error: null 
-      });
-    } catch (err) {
-      console.error('Error fetching houses and splits:', err);
-      res.render('newSplit', { 
-        houses: [],
-        error: 'Failed to load houses and splits' 
-      });
-    }
-  } else {
-    res.redirect('/login');
+    res.render('newSplit', { 
+      houses: housesWithSplits || [],
+      error: null 
+    });
+  } catch (err) {
+    console.error('Error fetching houses and splits:', err);
+    res.render('newSplit', { 
+      houses: [],
+      error: 'Failed to load houses and splits' 
+    });
   }
 });
 
@@ -635,6 +635,109 @@ app.delete('/leaveHouse/:houseId', async (req, res) => {
       error: 'Failed to leave house',
       details: error.message 
     });
+  }
+});
+
+// Get split details for editing
+app.get('/getSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const split = await knex('split')
+      .select('*')
+      .where('split_id', req.params.splitId)
+      .andWhere('creator_id', user.user_id)
+      .first();
+
+    if (!split) {
+      return res.status(404).json({ error: 'Split not found or unauthorized' });
+    }
+
+    res.json(split);
+  } catch (error) {
+    console.error('Error fetching split:', error);
+    res.status(500).json({ error: 'Failed to fetch split details' });
+  }
+});
+
+// Update split
+app.put('/updateSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      // Check if user is split creator
+      const split = await trx('split')
+        .where('split_id', req.params.splitId)
+        .andWhere('creator_id', user.user_id)
+        .first();
+
+      if (!split) {
+        throw new Error('Split not found or you are not the creator');
+      }
+
+      // Update split details
+      await trx('split')
+        .where('split_id', req.params.splitId)
+        .update({
+          split_name: req.body.split_name,
+          total_amount: req.body.total_amount,
+          date_due: req.body.date_due,
+          recurring: req.body.recurring === 'on',
+          frequency: req.body.recurring === 'on' ? req.body.frequency : null
+        });
+
+      // Get all users in the house
+      const houseUsers = await trx('user_houses')
+        .select('user_id')
+        .where('house_id', split.house_id);
+
+      // Calculate new equal share
+      const equalShare = parseFloat(req.body.total_amount) / houseUsers.length;
+
+      // Update payment records for each user
+      for (const houseUser of houseUsers) {
+        await trx('payment')
+          .where({
+            split_id: req.params.splitId,
+            user_id: houseUser.user_id
+          })
+          .update({
+            amount_due: equalShare
+          });
+      }
+    });
+
+    res.json({ message: 'Split updated successfully' });
+  } catch (error) {
+    console.error('Error updating split:', error);
+    res.status(500).json({ 
+      error: 'Failed to update split',
+      details: error.message 
+    });
+  }
+});
+
+// Add authentication middleware
+const authenticateUser = (req, res, next) => {
+  if (!req.session || !req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+};
+
+// Apply middleware to protected routes
+app.get('/newSplit', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.session.user.user_id;
+    // ... rest of the route handler
+  } catch (error) {
+    console.error('Error fetching houses and splits:', error);
+    res.status(500).render('error', { message: 'Error fetching houses and splits' });
   }
 });
 
