@@ -4,44 +4,31 @@
 
   <div class="container">
     <!-- Page Header -->
-    <h1 class="center-align">Welcome to SplitIt</h1>
-    <h5 class="center-align grey-text">Your All-In-One bill splitting tool</h5>
+    <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
     <br>
-
-    <!-- Button -->
-    <div class="center-align">
-      <a href="/login" class="waves-effect waves-light btn"><span class="txt_MainColor">Login</span></a>
-    </div>
 
     <div class="container">
       <!-- Recent Splits Section -->
       <h2 class="header-text ">Recent Splits</h2>
-      <ul class="collection" >
-        <li class="collection-item avatar editable-row">
-          <img src="images/yuna.jpg" alt="" class="circle">
-          <span class="title">Michael Backman</span>
-          <p>Second Line</p>
-          <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-        </li>
-        <li class="collection-item avatar editable-row">
-          <i class="material-icons circle">folder</i>
-          <span class="title">Logan Spencer</span>
-          <p>Another Second Line</p>
-          <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-        </li>
-            <li class="collection-item avatar editable-row">
-              <i class="material-icons circle green">insert_chart</i>
-              <span class="title">Lara Justus</span>
-              <p>Second Line</p>
-              <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-            </li>
-            <li class="collection-item avatar editable-row">
-              <i class="material-icons circle red">play_arrow</i>
-              <span class="title">Bryce Whitworth</span>
-              <p>Second Line</p>
-              <a href="#!" class="secondary-content"><i class="material-icons">grade</i></a>
-            </li>
+
+
+      <ul class="collection">
+        <% payments.forEach(payment => { %>
+          <div>
+            <div class="editable-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <li class="collection-item editable-row" data-id="<%= user.user_id %>">
+                <span class="title"><%= user.first_name %> <%= user.last_name %></span>
+                <p><%= payment.status %></p>
+              </li>
+              <!-- Right-aligned price -->
+              <div class="secondary-content" style="text-align: right;">
+                <i class="material-icons" style="display: inline-block; text-align: right; margin-right: 20px;"><%= payment.amount_due %></i>
+              </div>
+            </div>
+          </div>
+        <% }) %>
       </ul>
+      
     </div>
     
     
@@ -57,6 +44,7 @@
         They can be scheduled or a one time split. 
         Everything is handled from the security of Venmo Transactions.
       </h6>
+      <br>
     </div>
   </footer>
 

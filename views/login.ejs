@@ -5,20 +5,141 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Another Login</title>
-  <link rel="stylesheet" href="/styles.css">
+  <!-- <link rel="stylesheet" href="/styles.css"> -->
+  <style>
+   :root {
+  --main-color: #4db6ac;
+  --secondary-color: #8ec7c2;
+  --text-main: #eff8f6;
+  --dark-text: #333;
+  --light-grey: #f4f7f6;
+  --hover-color: #45a049;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--light-grey);
+  color: var(--dark-text);
+  /* Flexbox centering for the entire page */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+}
+
+.loginBody {
+  background-color: var(--light-grey);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* width: 100%; */
+  /* height: 100%; */
+  max-width: 400px; /* Ensures form doesn't stretch too wide */
+}
+
+.loginForm {
+  background-color: var(--text-main);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.loginForm h2 {
+  text-align: center;
+  color: var(--dark-text);
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.loginForm label {
+  font-size: 14px;
+  color: var(--dark-text);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.loginForm input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: var(--secondary-color);
+  color: var(--dark-text);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.loginForm input:focus {
+  border-color: var(--main-color);
+}
+
+.loginForm button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--main-color);
+  color: var(--text-main);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.loginForm button:hover {
+  background-color: var(--hover-color);
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+
+  </style>
 </head>
-<body class="loginBody">
-  <form action="/sendLogin" method="post" class="loginForm">
-    <h2>SplitIt</h2>
-    <div>
-        <br>
-        <label for="user">Username:</label>
-        <input type="text" name="user" id="user">
-        <br><br>
-        <label for="password">Password:</label>
-        <input type="text" name="password" id="password">
-        <button type="submit">Verify</button>
+<body>
+  <!-- <div class="loginBody"> -->
+  <form action="/login" method="post" class="loginForm">
+      <h2>SplitIt</h2>
+      <div>
+          <br>
+          <label for="username">Username:</label>
+          <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required 
+              placeholder="Enter Username"
+              class="inputField"
+          >
+          <br><br>
+          <label for="password">Password:</label>
+          <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              required 
+              placeholder="Enter Password"
+              class="inputField"
+          >
+          <button class="loginButton" type="submit">Verify</button>
+      </div>
+    </form>
+  <!-- </div> -->
+    
+
+  <% if (locals.error) { %>
+    <div class="error-message">
+        <%= error %>
     </div>
-  </form>
+  <% } %>
+
 </body>
 </html>

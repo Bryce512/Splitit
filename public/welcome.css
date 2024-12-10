@@ -1,6 +1,6 @@
 :root {
   --main-color: #4db6ac;
-  --secondary-color: #cee9e5;
+  --secondary-color: #8ec7c2;
   --text-main: #eff8f6;
   --dark-text: #333;
   --light-grey: #f4f7f6;
@@ -44,6 +44,8 @@ body {
   list-style: none;
   display: flex;
   gap: 20px;
+  margin-right: 50px;
+
 }
 
 .navbar .nav-links li {
@@ -137,7 +139,7 @@ body {
 .hero-section {
   text-align: center;
   padding: 40px;
-  background-color: var(--main-color);
+  background-color: var(--secondary-color);
   color: white;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -204,7 +206,7 @@ body {
 
 /* Call to Action Banner */
 .cta-banner {
-  background-color: var(--main-color);
+  background-color: var(--secondary-color);
   color: white;
   padding: 40px;
   text-align: center;

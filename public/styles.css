@@ -49,9 +49,9 @@
   width: 100%;
   margin: 0; /* Remove any default margins */
   padding: 0; /* Remove any default padding */
-  border-radius: 5px;
+  /* border-radius: 5px;
   border-width: 1px;
-  border-color: grey;
+  border-color: grey; */
 }
 
 /* Ensure each collection item also spans the full width */
@@ -59,6 +59,17 @@
   width: 100%;
   border-radius: 0px;
   box-sizing: border-box; /* Ensures padding does not affect width */
+}
+
+/* Hover effect for table rows */
+.editable-row:hover {
+  background-color: #f0f0f0;  /* Light grey on hover */
+  cursor: pointer;
+}
+
+/* Highlight the selected row */
+.editable-row.selected {
+  background-color: #b0e8e3;  /* Light teal when selected */
 }
 
 * Style for input and button */

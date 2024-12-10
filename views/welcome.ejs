@@ -8,19 +8,19 @@
 </head>
 
 <nav class="navbar">
-  <a href="#" class="logo">MySite</a>
+  <a href="#" class="logo">SplitIt</a>
   <ul class="nav-links">
     <li><a href="/home">Home</a></li>
     <li><a href="/about">About</a></li>
-    <li><a href="#">Services</a></li>
     <li><a href="/contact">Contact</a></li>
+    <li><a href="/login">Login</a></li>
   </ul>
   <button class="menu-btn">☰</button>
   <div class="mobile-nav">
-    <a href="#">Home</a>
-    <a href="#">About</a>
-    <a href="#">Services</a>
-    <a href="#">Contact</a>
+    <a href="/home">Home</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/login">Login</a>
   </div>
 </nav>
 
@@ -30,7 +30,7 @@
   <section class="hero-section">
     <h1 class="main_Color">Welcome to SplitIt!</h1>
     <p>Effortlessly split your bills from utilities, rent, or restaurant checks. Whether it's a one-time split or scheduled, everything is securely handled through Venmo transactions.</p>
-    <button class="cta-button">Get Started</button>
+    <form action="/home" method="GET"><button class="cta-button">Get Started</button></form>
   </section>
 
   <!-- Features Section -->
@@ -59,9 +59,9 @@
   <footer class="page-footer">
     <div class="footer-logo">SplitIt</div>
     <div class="footer-links">
-      <a href="#">About</a>
+      <a href="/about">About</a>
       <a href="#">Privacy</a>
-      <a href="#">Contact</a>
+      <a href="/contact">Contact</a>
     </div>
   </footer>
 
