@@ -103,7 +103,7 @@
                     <div>
                       <span class="title"><%= split.split_name %></span>
                       <p>
-                        Amount: $<%= split.total_amount %><br>
+                        Amount: <%= split.total_amount %><br>
                         Due: <%= new Date(split.date_due).toLocaleDateString() %>
                       </p>
                     </div>
