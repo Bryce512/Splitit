@@ -1,61 +1,89 @@
 <%- include('components/navbar') %>
 
-
+<div class="container">
+  <!-- Page Header -->
+  <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
+  <br>
 
   <div class="container">
-    <!-- Page Header -->
-    <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
-    <br>
+    <!-- Recent Splits Section -->
+    <h2 class="header-text">Recent Splits</h2>
 
-    <div class="container">
-      <!-- Recent Splits Section -->
-      <h2 class="header-text ">Recent Splits</h2>
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchBox" 
+        placeholder="Search by first or last name" 
+        oninput="liveSearch(this.value)">
+    </div>
 
-
-      <ul class="collection">
-        <% payments.forEach(payment => { %>
+    <ul class="collection" id="mainTable">
+      <% payments.forEach(payment => { %>
+        <li 
+          class="collection-item editable-row" 
+          data-entity="split" 
+          data-first-name="<%= payment.first_name %>" 
+          data-last-name="<%= payment.last_name %>"
+        >
           <div>
-            <div class="editable-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-              <li class="collection-item editable-row" data-id="<%= user.user_id %>">
-                <span class="title"><%= user.first_name %> <%= user.last_name %></span>
-                <p><%= payment.status %></p>
-              </li>
-              <!-- Right-aligned price -->
-              <div class="secondary-content" style="text-align: right;">
-                <i class="material-icons" style="display: inline-block; text-align: right; margin-right: 20px;"><%= payment.amount_due %></i>
-              </div>
-            </div>
+            <!-- User Info -->
+            <span class="title"><%= payment.first_name %> <%= payment.last_name %></span>
+            
+            <!-- Payment Info -->
+            <p>
+              Amount Due: $<%= payment.amount_due %><br>
+              Status: <%= payment.status %><br>
+              Due Date: <%= new Date(payment.date_due).toLocaleDateString() %><br>
+              Frequency: <%= payment.frequency %>
+            </p>
           </div>
-        <% }) %>
-      </ul>
-      
-    </div>
-    
-    
-              
-<br>
-  <!-- Footer -->
-  <footer class="page-footer main_Color">
-    <div class="container">
-      <h5 class="white-text">SplitIt</h5>
-      <h6 class="grey-text text-lighten-4">
-        The SplitIt tool is designed to help users easily split bills 
-        from  utilities and rent to resturaunt checks. 
-        They can be scheduled or a one time split. 
-        Everything is handled from the security of Venmo Transactions.
-      </h6>
-      <br>
-    </div>
-  </footer>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</div>
 
-  <!-- Materialize JavaScript (for interactive components) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const elems = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(elems);
+<footer class="page-footer main_Color">
+  <div class="container">
+    <h5 class="white-text">SplitIt</h5>
+    <h6 class="grey-text text-lighten-4">
+      The SplitIt tool is designed to help users easily split bills 
+      from utilities and rent to restaurant checks. 
+      They can be scheduled or a one-time split. 
+      Everything is handled from the security of Venmo Transactions.
+    </h6>
+    <br>
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const elems = document.querySelectorAll('.sidenav');
+    M.Sidenav.init(elems);
+  });
+
+  // Search Function
+  async function liveSearch(query) {
+    console.log("Executing search query: " + query);
+
+    // If no query, reset table
+    if (!query) {
+      document.querySelectorAll('.editable-row').forEach(row => row.style.display = '');
+      return;
+    }
+
+    const queryLower = query.toLowerCase();
+
+    document.querySelectorAll('.editable-row').forEach(row => {
+      const firstName = row.getAttribute('data-first-name').toLowerCase();
+      const lastName = row.getAttribute('data-last-name').toLowerCase();
+
+      if (firstName.includes(queryLower) || lastName.includes(queryLower)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
     });
-
-  </script>
-</body>
-</html>
+  }
+</script>
