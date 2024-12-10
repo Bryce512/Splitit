@@ -254,14 +254,14 @@ app.post('/createProfile', async (req, res) => {
 app.get('/newSplit', async (req, res) => {
   if (authorized) {
     try {
-        // Get houses where the current user is the owner
+        // Replace req.user.user_id with the global user variable
         const houses = await knex('houses')
           .select('houses.*')
-          .where('owner_id', req.user.user_id)  // You'll need to implement user sessions
+          .where('owner_id', user.user_id)
           .orWhereIn('house_id', function() {
             this.select('house_id')
               .from('user_houses')
-              .where('user_id', req.user.user_id);
+              .where('user_id', user.user_id);
           });
 
         console.log('Houses passed to template:', houses);
@@ -270,28 +270,16 @@ app.get('/newSplit', async (req, res) => {
           houses: houses || [],
           error: null 
         });
-    
-    // Insert the new split into the database
-    await knex('splits').insert({
-      split_name: split_name,
-      house_id: house_id,
-      total_amount: total_amount,
-      due_date: due_date,
-      created_at: knex.fn.now(), // Optional: add a timestamp for when the split was created
-    });
-    // Redirect to the home page after success
-    res.redirect('/home');
-  } catch (err) {
+    } catch (err) {
         console.error('Error fetching houses:', err);
         res.render('newSplit', { 
           houses: [],
           error: 'Failed to load houses' 
-        })
-      }
+        });
+    }
   } else {
-    res.redirect('/login')
+    res.redirect('/login');
   }
-  
 });
 
 // Route to handle split creation
