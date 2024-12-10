@@ -68,6 +68,9 @@ app.get('/newHouse', async (req, res) => {
   }
 });
 
+
+
+
 // Route to handle the house creation form submission
 app.post('/createHouse', async (req, res) => {
   try {
@@ -189,13 +192,26 @@ app.get('/newSplit', async (req, res) => {
       houses: houses,
       error: null 
     });
+
+    // Insert the new split into the database
+    await knex('splits').insert({
+      split_name: split_name,
+      house_id: house_id,
+      total_amount: total_amount,
+      due_date: due_date,
+      created_at: knex.fn.now(), // Optional: add a timestamp for when the split was created
+    });
+    // Redirect to the home page after success
+    res.redirect('/home');
   } catch (err) {
     console.error('Error fetching houses:', err);
     res.render('newSplit', { 
       houses: [],
       error: 'Failed to load houses' 
-    });
+    })
   }
+  console.log('Houses passed to template:', houses);
+
 });
 
 // Route to handle split creation
