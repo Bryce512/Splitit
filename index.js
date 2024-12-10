@@ -254,28 +254,65 @@ app.post('/createProfile', async (req, res) => {
 app.get('/newSplit', async (req, res) => {
   if (authorized) {
     try {
-        // Replace req.user.user_id with the global user variable
-        const houses = await knex('houses')
-          .select('houses.*')
-          .where('owner_id', user.user_id)
-          .orWhereIn('house_id', function() {
-            this.select('house_id')
-              .from('user_houses')
-              .where('user_id', user.user_id);
-          });
+      // Get houses with their splits
+      const houses = await knex('houses')
+        .select(
+          'houses.*',
+          'split.split_id',
+          'split.split_name',
+          'split.total_amount',
+          'split.date_due'
+        )
+        .where('houses.owner_id', user.user_id)
+        .orWhereIn('houses.house_id', function() {
+          this.select('house_id')
+            .from('user_houses')
+            .where('user_id', user.user_id);
+        })
+        .leftJoin('split', 'houses.house_id', 'split.house_id')
+        .orderBy('houses.house_id', 'split.date_due');
 
-        console.log('Houses passed to template:', houses);
+      // Group splits by house
+      const housesWithSplits = houses.reduce((acc, row) => {
+        const house = acc.find(h => h.house_id === row.house_id);
+        if (house) {
+          if (row.split_id) {
+            house.splits = house.splits || [];
+            house.splits.push({
+              split_id: row.split_id,
+              split_name: row.split_name,
+              total_amount: row.total_amount,
+              date_due: row.date_due
+            });
+          }
+        } else {
+          const newHouse = {
+            house_id: row.house_id,
+            st_address: row.st_address,
+            city: row.city,
+            state: row.state,
+            splits: row.split_id ? [{
+              split_id: row.split_id,
+              split_name: row.split_name,
+              total_amount: row.total_amount,
+              date_due: row.date_due
+            }] : []
+          };
+          acc.push(newHouse);
+        }
+        return acc;
+      }, []);
 
-        res.render('newSplit', { 
-          houses: houses || [],
-          error: null 
-        });
+      res.render('newSplit', { 
+        houses: housesWithSplits || [],
+        error: null 
+      });
     } catch (err) {
-        console.error('Error fetching houses:', err);
-        res.render('newSplit', { 
-          houses: [],
-          error: 'Failed to load houses' 
-        });
+      console.error('Error fetching houses and splits:', err);
+      res.render('newSplit', { 
+        houses: [],
+        error: 'Failed to load houses and splits' 
+      });
     }
   } else {
     res.redirect('/login');
@@ -284,28 +321,68 @@ app.get('/newSplit', async (req, res) => {
 
 // Route to handle split creation
 app.post('/createSplit', async (req, res) => {
-  if (authorized) {
-    try {
-        const [splitId] = await knex('split').insert({
-          creator_id: req.user.user_id,  // You'll need to implement user sessions
-          house_id: req.body.house_id,
-          creator_pays: true,  // Default value
-          calc_method: true,   // Default value
-          total_amount: req.body.total_amount,
-          date_due: req.body.date_due,
-          recurring: false,    // For one-time splits
-          frequency: null      // For one-time splits
-        }).returning('split_id');
-
-        res.redirect('/dashboard');  // Or wherever you want to redirect after success
-      } catch (error) {
-        console.error('Error creating split:', error);
-        res.redirect('/newSplit?error=Failed to create split');
-      }
-  } else {
-    res.redirect('/login')
+  if (!authorized) {
+    return res.redirect('/login');
   }
-  
+
+  try {
+    await knex.transaction(async (trx) => {
+      // Create the split
+      const [splitResult] = await trx('split').insert({
+        creator_id: user.user_id,
+        house_id: req.body.house_id,
+        split_name: req.body.split_name,
+        creator_pays: true,
+        calc_method: true,
+        total_amount: req.body.total_amount,
+        date_due: req.body.date_due,
+        recurring: req.body.recurring === 'on',
+        frequency: req.body.recurring === 'on' ? req.body.frequency : null
+      }).returning('split_id');
+
+      // Extract the actual split_id value
+      const splitId = splitResult.split_id;
+      console.log('Split created with ID:', splitId);
+
+      // Get all users in the house
+      const houseUsers = await trx('user_houses')
+        .select('user_id')
+        .where('house_id', req.body.house_id);
+
+      console.log('House users found:', houseUsers);
+
+      // Calculate equal share for each user
+      const equalShare = parseFloat(req.body.total_amount) / houseUsers.length;
+
+      // Create payment records for each user in the house
+      const payments = houseUsers.map(houseUser => ({
+        split_id: splitId, // Use the actual integer value
+        user_id: houseUser.user_id,
+        amount_due: equalShare,
+        status: 'pending',
+        pmt_method: 'venmo'
+      }));
+
+      console.log('Creating payments:', payments);
+
+      // Insert all payment records
+      await trx('payment').insert(payments);
+    });
+
+    res.redirect('/newSplit');
+
+  } catch (error) {
+    console.error('Detailed error creating split:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+    
+    res.render('newSplit', { 
+      houses: [],
+      error: 'Failed to create split: ' + error.message 
+    });
+  }
 });
 
 // About page route
