@@ -2,7 +2,7 @@ let express = require('express');
 let app = express();
 let path = require('path');
 const PORT = process.env.PORT || 3000
-let authorized = false;
+let authorized = true;
 let user;
 // grab html form from file 
 // allows to pull JSON data from form 
@@ -28,18 +28,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/home', async (req, res) => {
-  if (authorized) {
-    let payments = await knex('payment')
-              .select('*')
-              .where('user_id', user.user_id) // Get all the payment for a specific user
-      res.render('home', {
-        user:user,
-        payments:payments
-      })
-  } else {
-    res.redirect('/login')
-  }
-  
+  if (authorized && user) {
+
+        let payments = await knex('payment')
+                  .select('*')
+                  .where('user_id', user.user_id) // Get all the payment for a specific user
+          res.render('home', {
+            user:user,
+            payments:payments
+          })
+      } else {
+        res.redirect('/login')
+      } 
 });
 
 // Serve the login page (login.ejs)
@@ -172,6 +172,32 @@ app.post('/createHouse', async (req, res) => {
   }
 });
   
+app.get('/home', async (req, res) => {
+  if (authorized) {
+    try {
+      const payments = await knex('payment')
+        .select(
+          'split.split_name',
+          'payment.amount_due',
+          'payment.status',
+          'split.date_due',
+        )
+        .leftJoin('split', 'split.split_id', '=', 'payment.split_id')
+        .where('payment.user_id', user.user_id); // Get payments for the logged-in user
+
+      res.render('home', {
+        user,
+        payments,
+      });
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      res.redirect('/login');
+    }
+  } else {
+    res.redirect('/login');
+  }
+});
+
 
 // Route to display the new profile form
 app.get('/newProfile', (req, res) => {

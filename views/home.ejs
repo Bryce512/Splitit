@@ -1,23 +1,40 @@
 <%- include('components/navbar') %>
 
-
+<div class="container">
+  <!-- Page Header -->
+  <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
+  <br>
 
   <div class="container">
-    <!-- Page Header -->
-    <h1 class="center-align">Welcome Home, <%- user.first_name %></h1>
-    <br>
+    <!-- Recent Splits Section -->
+    <h2 class="header-text">Recent Splits</h2>
 
-    <div class="container">
-      <!-- Recent Splits Section -->
-      <h2 class="header-text ">Recent Splits</h2>
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchBox" 
+        placeholder="Search by first or last name" 
+        oninput="liveSearch(this.value)">
+    </div>
 
-
-      <ul class="collection">
-        <% payments.forEach(payment => { %>
+    <ul class="collection" id="mainTable" id="payment_container">
+      <% payments.forEach(payment => { %>
+        <li 
+          class="collection-item editable-row" 
+          data-entity="split" 
+          data-first-name="<%= payment.first_name %>" 
+          data-last-name="<%= payment.last_name %>"
+        >
           <div>
             <div class="editable-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-              <li class="collection-item editable-row" data-id="<%= user.user_id %>" payment-id="<%= payment.pmt_id %>" >
-                <span class="title"><%= user.first_name %> <%= user.last_name %></span>
+              <li class="collection-item editable-row" 
+                  data-id="<%= user.user_id %>" 
+                  payment-id="<%= payment.pmt_id %>" 
+                  amount_due="<%= payment.amount_due %>"
+                  split_name="<%= payment.split_name %>"
+                  type = "payment">
+                <span class="title"><%= payment.split_name %></span>
                 <p><%= payment.status %></p>
               </li>
               <!-- Right-aligned price -->
@@ -26,63 +43,79 @@
               </div>
             </div>
           </div>
-        <% }) %>
-      </ul>
-      
-    </div>
-    
-    
-              
-<br>
-  <!-- Footer -->
-  <footer class="page-footer main_Color">
-    <div class="container">
-      <h5 class="white-text">SplitIt</h5>
-      <h6 class="grey-text text-lighten-4">
-        The SplitIt tool is designed to help users easily split utility and rentbills. 
-        They can be scheduled or a one time split. 
-        Everything is handled from the security of Venmo Transactions.
-      </h6>
-      <br>
-    </div>
-    <div id="overlay" class="overlay hidden"></div>
-  </footer>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</div>
 
-  <!-- Materialize JavaScript (for interactive components) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const elems = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(elems);
+<footer class="page-footer main_Color">
+  <div class="container">
+    <h5 class="white-text">SplitIt</h5>
+    <h6 class="grey-text text-lighten-4">
+      The SplitIt tool is designed to help users easily split bills 
+      from utilities and rent to restaurant checks. 
+      They can be scheduled or a one-time split. 
+      Everything is handled from the security of Venmo Transactions.
+    </h6>
+    <br>
+  </div>
+</footer>
+
+    <!-- Materialize JavaScript (for interactive components) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const elems = document.querySelectorAll('.sidenav');
+        M.Sidenav.init(elems);
+      });
+
+  // Search Function
+  async function liveSearch(query) {
+    console.log("Executing search query: " + query);
+
+    // If no query, reset table
+    if (!query) {
+      document.querySelectorAll('.editable-row').forEach(row => row.style.display = '');
+      return;
+    }
+
+    const queryLower = query.toLowerCase();
+
+    document.querySelectorAll('.editable-row').forEach(row => {
+      const firstName = row.getAttribute('data-first-name').toLowerCase();
+      const lastName = row.getAttribute('data-last-name').toLowerCase();
+
+      if (firstName.includes(queryLower) || lastName.includes(queryLower)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
     });
-
+  }
   </script>
-</body>
-</html>
 
-
-<div id="editModal" class="modal hidden">
+<div id="editModal" class="editModal hidden">
   <div class="modal-content">
-    <h4 id="modalTitle">Add Admin</h4>
-    <form action="/add-admin" method="POST">
-      <select style="display: block;" name="add_entity_name" id="add-admin-dropdown" required>
-        <option value="">Select Team Member</option>
-        <% teamMembers.forEach(function(member) { %>
-          <option value="<%= member.contact_id %>">
-            <%= member.last_name %>, <%= member.first_name %>
-          </option>
-        <% }); %>
+    <h4 id="modalTitle">Pay Split</h4>
+    <br>
+    <h6 id="split_name"></h6>
+    <p id="modal_Amount_Due"></p>
+    <form id="paymentForm"action="/makePayment/${id}" method="POST">
+      <select style="display: block;" name="status" id="status" required>
+        <option value="">Select Status</option>
+        <option value="waiting">Waiting</option>
+        <option value="paid">Paid</option>
+        <!-- Option items will be dynamically generated -->
       </select>
-      <div class="input-field">
-        <input id="add-entity-username" type="text" name="username" placeholder="Username" required>
-      </div>
-      <div class="input-field">
-        <input id="add-entity-password" type="text" name="password" placeholder="Password" required>
-      </div>
       <div class="modal-footer">
-        <button type="button" class=" adminModalClose btn grey">Cancel</button>
-        <button type="submit" class="btn green">Save</button>
+        <button type="button" class="adminModalClose btn grey">Cancel</button>
+        <button type="submit" class="btn green">Pay</button>
       </div>
     </form>
   </div>
 </div>
+
+<!-- Overlay for Modal -->
+<div id="overlay" class="overlay"></div>
+

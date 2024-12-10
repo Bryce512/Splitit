@@ -1,41 +1,90 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('modal');
-  const overlay = document.getElementById('overlay');
-  const closeModalBtn = document.querySelector('.modal-close');
+  console.log("DOM fully loaded and parsed");
+  overlay = document.getElementById('overlay');
 
+  // Function to open the modal
+  const openModal = function(id) {
+    const modal = document.getElementById('editModal');
+    const overlay = document.getElementById('overlay'); // Assuming you have an overlay element
+      if (modal) {
+        console.log('found modal');
+      }
+    // Make modal visible
+    modal.classList.remove('hidden');
+    modal.classList.add('visible');
+    overlay.classList.add('visible');
 
-  // Attach row click events dynamically (This is the important part)
+    // Set dynamic modal content based on the row's ID
+    const titleElement = document.getElementById('modalTitle');
+    titleElement.textContent = `Pay ${split_name}`;  // Update the title (customize as needed)
+
+    // Optionally, populate form fields based on the ID
+    document.getElementById('status').value = `user${id}`; // Sample dynamic data (adjust as needed)
+    overlay.addEventListener('click', closeModal);
+
+  };
+
+  // Function to close the modal
+  const closeModal = function() {
+    const modal = document.getElementById('editModal');
+    const overlay = document.getElementById('overlay');
+
+    // Hide the modal and overlay
+    modal.classList.remove('visible');
+    overlay.classList.remove('visible');
+  };
+
+  // Use event delegation to handle row clicks
   const editModal = () => {
-    let title = '';
-    const openModalBtns = document.querySelectorAll('.editable-row');
-    const titleElement = document.getElementById('modalTitle');  // Make sure the ID matches
+    const container = document.getElementById('payment_container'); // Parent element of all rows, e.g., <ul> or <table>
+    const form = document.getElementById('paymentForm');
+
+    container.addEventListener('click', function(e) {
+      const row = e.target.closest('.editable-row'); // Find the closest editable-row element that was clicked
+      const type = row.getAttribute('type');
+
+      if (type === 'payment') {
+        const amount_due = row.getAttribute('amount_Due');
+        const split_name = row.getAttribute('split_name');
+
+  
+  
+        document.getElementById('modal_Amount_Due').innerText = amount_due;
+        document.getElementById('split_name').innerText = split_name;
+      }
 
 
-    openModalBtns.forEach(row => {
-      row.addEventListener('click', function () {
-        const id = row.getAttribute('pmt-id');
-      })
+      // Ensure the row is valid and has the 'payment-id' attribute
+      if (row && row.hasAttribute('payment-id')) {
+        const id = row.getAttribute('payment-id'); // Get the 'payment-id' from the clicked row
+        console.log(`Opening modal for payment-id: ${id}`);  // Debug log to confirm the ID
+        // Set the form action with the dynamic id
+        form.action = `/makePayment/${id}`;
+        if (id) {
+          openModal(id); // Open the modal and pass the ID to update the modal's content
+        } else {
+          console.log("Row does not have payment-id attribute");
+        }
+      }
+    });
 
-    openModal(id);
+    // Close modal on Cancel button click
+    const closeModalBtn = document.querySelector('.adminModalClose');
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent form submission if needed
+        closeModal();
+      });
+    }
+  }
 
-  });
+  // Call editModal function to attach events on page load
+  editModal();
+});
 
-  editModal()
-}
 
-// Open modal function
-const openModal = function (id) {
-  modal.classList.add('visible');
-  overlay.classList.add('visible');
-};
 
-const closeModal = function () {
-  modal.classList.remove('visible');
-  modal1.classList.remove('visible');
-  overlay.classList.remove('visible');
-  deleteButton.style.display = 'none'; // Hide the delete button when closing modal
-}
 
 
 document.querySelectorAll('.editable-row').forEach(row => {
@@ -45,6 +94,4 @@ document.querySelectorAll('.editable-row').forEach(row => {
   row.addEventListener('mouseleave', () => {
     row.classList.remove('hover');
   });
-});
-
 });
