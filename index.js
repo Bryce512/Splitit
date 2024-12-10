@@ -2,7 +2,7 @@ let express = require('express');
 let app = express();
 let path = require('path');
 const PORT = process.env.PORT || 3000
-let authorized = false;
+let authorized = true;
 let user;
 // grab html form from file 
 // allows to pull JSON data from form 
@@ -28,18 +28,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/home', async (req, res) => {
-  if (authorized) {
-    let payments = await knex('payment')
-              .select('*')
-              .where('user_id', user.user_id) // Get all the payment for a specific user
-      res.render('home', {
-        user:user,
-        payments:payments
-      })
-  } else {
-    res.redirect('/login')
-  }
-  
+  if (authorized && user) {
+
+        let payments = await knex('payment')
+                  .select('*')
+                  .where('user_id', user.user_id) // Get all the payment for a specific user
+          res.render('home', {
+            user:user,
+            payments:payments
+          })
+      } else {
+        res.redirect('/login')
+      } 
 });
 
 // Serve the login page (login.ejs)
