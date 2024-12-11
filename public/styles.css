@@ -72,7 +72,7 @@
   background-color: #b0e8e3;  /* Light teal when selected */
 }
 
-* Style for input and button */
+/* * Style for input and button */ */
 input[type="text"] {
   padding: 10px;
   width: 80%;

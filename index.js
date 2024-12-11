@@ -33,8 +33,7 @@ app.get('/home', async (req, res) => {
         let payments = await knex('payment')
             .select(  
               'split.split_name',
-              'payment.amount_due',
-              'payment.status',
+              'payment.*',
               'split.date_due',
             )
             .leftJoin('split', 'split.split_id', '=', 'payment.split_id')

@@ -1,15 +1,12 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("DOM fully loaded and parsed");
   overlay = document.getElementById('overlay');
 
   // Function to open the modal
-  const openModal = function(id) {
+  const openModal = function(id, split_name) {
     const modal = document.getElementById('editModal');
     const overlay = document.getElementById('overlay'); // Assuming you have an overlay element
-      if (modal) {
-        console.log('found modal');
-      }
+
     // Make modal visible
     modal.classList.remove('hidden');
     modal.classList.add('visible');
@@ -17,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set dynamic modal content based on the row's ID
     const titleElement = document.getElementById('modalTitle');
-    titleElement.textContent = `Pay ${split_name}`;  // Update the title (customize as needed)
+    titleElement.textContent = "Pay " + split_name;  // Update the title (customize as needed)
 
     // Optionally, populate form fields based on the ID
     document.getElementById('status').value = `user${id}`; // Sample dynamic data (adjust as needed)
@@ -43,26 +40,22 @@ document.addEventListener('DOMContentLoaded', function() {
     container.addEventListener('click', function(e) {
       const row = e.target.closest('.editable-row'); // Find the closest editable-row element that was clicked
       const type = row.getAttribute('type');
+      const split_name = row.getAttribute('split_name');
+      const amount_due = row.getAttribute('amount_Due');
+
 
       if (type === 'payment') {
-        const amount_due = row.getAttribute('amount_Due');
-        const split_name = row.getAttribute('split_name');
-
-  
   
         document.getElementById('modal_Amount_Due').innerText = amount_due;
-        document.getElementById('split_name').innerText = split_name;
       }
-
 
       // Ensure the row is valid and has the 'payment-id' attribute
       if (row && row.hasAttribute('payment-id')) {
         const id = row.getAttribute('payment-id'); // Get the 'payment-id' from the clicked row
-        console.log(`Opening modal for payment-id: ${id}`);  // Debug log to confirm the ID
         // Set the form action with the dynamic id
         form.action = `/makePayment/${id}`;
         if (id) {
-          openModal(id); // Open the modal and pass the ID to update the modal's content
+          openModal(id,split_name); // Open the modal and pass the ID to update the modal's content
         } else {
           console.log("Row does not have payment-id attribute");
         }
