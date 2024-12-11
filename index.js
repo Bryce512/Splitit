@@ -257,72 +257,137 @@ app.post('/createProfile', async (req, res) => {
 
 // Route to display the new split form
 app.get('/newSplit', async (req, res) => {
-  if (authorized) {
-    try {
-        // Get houses where the current user is the owner
-        const houses = await knex('houses')
-          .select('houses.*')
-          .where('owner_id', req.user.user_id)  // You'll need to implement user sessions
-          .orWhereIn('house_id', function() {
-            this.select('house_id')
-              .from('user_houses')
-              .where('user_id', req.user.user_id);
-          });
-
-        console.log('Houses passed to template:', houses);
-
-        res.render('newSplit', { 
-          houses: houses || [],
-          error: null 
-        });
-    
-    // Insert the new split into the database
-    await knex('splits').insert({
-      split_name: split_name,
-      house_id: house_id,
-      total_amount: total_amount,
-      due_date: due_date,
-      created_at: knex.fn.now(), // Optional: add a timestamp for when the split was created
-    });
-    // Redirect to the home page after success
-    res.redirect('/home');
-  } catch (err) {
-        console.error('Error fetching houses:', err);
-        res.render('newSplit', { 
-          houses: [],
-          error: 'Failed to load houses' 
-        })
-      }
-  } else {
-    res.redirect('/login')
+  if (!authorized || !user) {
+    return res.redirect('/login');
   }
-  
+
+  try {
+    // Get houses with their splits
+    const houses = await knex('houses')
+      .select(
+        'houses.*',
+        'split.split_id',
+        'split.split_name',
+        'split.total_amount',
+        'split.date_due'
+      )
+      .where('houses.owner_id', user.user_id)
+      .orWhereIn('houses.house_id', function() {
+        this.select('house_id')
+          .from('user_houses')
+          .where('user_id', user.user_id);
+      })
+      .leftJoin('split', 'houses.house_id', 'split.house_id')
+      .orderBy('houses.house_id', 'split.date_due');
+
+    // Group splits by house
+    const housesWithSplits = houses.reduce((acc, row) => {
+      const house = acc.find(h => h.house_id === row.house_id);
+      if (house) {
+        if (row.split_id) {
+          house.splits = house.splits || [];
+          house.splits.push({
+            split_id: row.split_id,
+            split_name: row.split_name,
+            total_amount: row.total_amount,
+            date_due: row.date_due
+          });
+        }
+      } else {
+        const newHouse = {
+          house_id: row.house_id,
+          st_address: row.st_address,
+          city: row.city,
+          state: row.state,
+          splits: row.split_id ? [{
+            split_id: row.split_id,
+            split_name: row.split_name,
+            total_amount: row.total_amount,
+            date_due: row.date_due
+          }] : []
+        };
+        acc.push(newHouse);
+      }
+      return acc;
+    }, []);
+
+    res.render('newSplit', { 
+      houses: housesWithSplits || [],
+      error: null 
+    });
+  } catch (err) {
+    console.error('Error fetching houses and splits:', err);
+    res.render('newSplit', { 
+      houses: [],
+      error: 'Failed to load houses and splits' 
+    });
+  }
 });
 
 // Route to handle split creation
 app.post('/createSplit', async (req, res) => {
-  if (authorized) {
-    try {
-        const [splitId] = await knex('split').insert({
-          creator_id: req.user.user_id,  // You'll need to implement user sessions
-          house_id: req.body.house_id,
-          creator_pays: true,  // Default value
-          calc_method: true,   // Default value
-          total_amount: req.body.total_amount,
-          date_due: req.body.date_due,
-          recurring: false,    // For one-time splits
-          frequency: null      // For one-time splits
-        }).returning('split_id');
-
-        res.redirect('/dashboard');  // Or wherever you want to redirect after success
-      } catch (error) {
-        console.error('Error creating split:', error);
-        res.redirect('/newSplit?error=Failed to create split');
-      }
-  } else {
-    res.redirect('/login')
+  if (!authorized) {
+    return res.redirect('/login');
   }
-  
+
+  try {
+    await knex.transaction(async (trx) => {
+      // Create the split
+      const [splitResult] = await trx('split').insert({
+        creator_id: user.user_id,
+        house_id: req.body.house_id,
+        split_name: req.body.split_name,
+        creator_pays: true,
+        calc_method: true,
+        total_amount: req.body.total_amount,
+        date_due: req.body.date_due,
+        recurring: req.body.recurring === 'on',
+        frequency: req.body.recurring === 'on' ? req.body.frequency : null
+      }).returning('split_id');
+
+      // Extract the actual split_id value
+      const splitId = splitResult.split_id;
+      console.log('Split created with ID:', splitId);
+
+      // Get all users in the house
+      const houseUsers = await trx('user_houses')
+        .select('user_id')
+        .where('house_id', req.body.house_id);
+
+      console.log('House users found:', houseUsers);
+
+      // Calculate equal share for each user
+      const equalShare = parseFloat(req.body.total_amount) / houseUsers.length;
+
+      // Create payment records for each user in the house
+      const payments = houseUsers.map(houseUser => ({
+        split_id: splitId, // Use the actual integer value
+        user_id: houseUser.user_id,
+        amount_due: equalShare,
+        status: 'pending',
+        pmt_method: 'venmo'
+      }));
+
+      console.log('Creating payments:', payments);
+
+      // Insert all payment records
+      await trx('payment').insert(payments);
+    });
+
+    res.redirect('/newSplit');
+
+  } catch (error) {
+    console.error('Detailed error creating split:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body
+    });
+    
+    res.render('newSplit', { 
+      houses: [],
+      error: 'Failed to create split: ' + error.message 
+    });
+  }
 });
 
 // About page route
@@ -333,6 +398,346 @@ app.get('/about', (req, res) => {
 // Contact page route
 app.get('/contact', (req, res) => {
   res.render('contact');
+});
+
+// Add this delete route after your other routes
+app.delete('/deleteProfile/:userId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Start a transaction since we'll be deleting from multiple tables
+    await knex.transaction(async (trx) => {
+      const userId = req.params.userId;
+
+      // First delete from user_houses table (foreign key relationship)
+      await trx('user_houses')
+        .where('user_id', userId)
+        .del();
+
+      // Delete from payment table
+      await trx('payment')
+        .where('user_id', userId)
+        .del();
+
+      // Delete from split table where user is creator
+      await trx('split')
+        .where('creator_id', userId)
+        .del();
+
+      // Finally delete the user
+      const deletedCount = await trx('users')
+        .where('user_id', userId)
+        .del();
+
+      if (deletedCount === 0) {
+        throw new Error('User not found');
+      }
+    });
+
+    // If user deleted themselves, log them out
+    if (user.user_id === parseInt(req.params.userId)) {
+      authorized = false;
+      return res.json({ message: 'Profile deleted successfully', redirect: '/login' });
+    }
+
+    res.json({ message: 'Profile deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete profile',
+      details: error.message 
+    });
+  }
+});
+
+// Delete routes for various entities
+// Add these after your other routes
+
+// Delete House
+app.delete('/deleteHouse/:houseId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const houseId = req.params.houseId;
+
+      // Check if user is house owner
+      const house = await trx('houses')
+        .where('house_id', houseId)
+        .andWhere('owner_id', user.user_id)
+        .first();
+
+      if (!house) {
+        throw new Error('House not found or you are not the owner');
+      }
+
+      // Delete related records in order
+      await trx('payment')
+        .whereIn('split_id', function() {
+          this.select('split_id')
+            .from('split')
+            .where('house_id', houseId);
+        })
+        .del();
+
+      await trx('split')
+        .where('house_id', houseId)
+        .del();
+
+      await trx('user_houses')
+        .where('house_id', houseId)
+        .del();
+
+      await trx('houses')
+        .where('house_id', houseId)
+        .del();
+    });
+
+    res.json({ message: 'House deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting house:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete house',
+      details: error.message 
+    });
+  }
+});
+
+// Delete Split
+app.delete('/deleteSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const splitId = req.params.splitId;
+
+      // Check if user is split creator
+      const split = await trx('split')
+        .where('split_id', splitId)
+        .andWhere('creator_id', user.user_id)
+        .first();
+
+      if (!split) {
+        throw new Error('Split not found or you are not the creator');
+      }
+
+      // Delete payments first
+      await trx('payment')
+        .where('split_id', splitId)
+        .del();
+
+      // Delete the split
+      await trx('split')
+        .where('split_id', splitId)
+        .del();
+    });
+
+    res.json({ message: 'Split deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting split:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete split',
+      details: error.message 
+    });
+  }
+});
+
+// Delete Payment
+app.delete('/deletePayment/:paymentId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const paymentId = req.params.paymentId;
+
+    // Check if user owns this payment
+    const payment = await knex('payment')
+      .where('pmt_id', paymentId)
+      .andWhere('user_id', user.user_id)
+      .first();
+
+    if (!payment) {
+      throw new Error('Payment not found or you are not authorized');
+    }
+
+    await knex('payment')
+      .where('pmt_id', paymentId)
+      .del();
+
+    res.json({ message: 'Payment deleted successfully' });
+
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete payment',
+      details: error.message 
+    });
+  }
+});
+
+// Delete User from House
+app.delete('/leaveHouse/:houseId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      const houseId = req.params.houseId;
+
+      // Check if user is in this house
+      const userHouse = await trx('user_houses')
+        .where({
+          house_id: houseId,
+          user_id: user.user_id
+        })
+        .first();
+
+      if (!userHouse) {
+        throw new Error('You are not a member of this house');
+      }
+
+      // Delete user's payments for this house's splits
+      await trx('payment')
+        .where('user_id', user.user_id)
+        .whereIn('split_id', function() {
+          this.select('split_id')
+            .from('split')
+            .where('house_id', houseId);
+        })
+        .del();
+
+      // Remove user from house
+      await trx('user_houses')
+        .where({
+          house_id: houseId,
+          user_id: user.user_id
+        })
+        .del();
+    });
+
+    res.json({ message: 'Successfully left the house' });
+
+  } catch (error) {
+    console.error('Error leaving house:', error);
+    res.status(500).json({ 
+      error: 'Failed to leave house',
+      details: error.message 
+    });
+  }
+});
+
+// Get split details for editing
+app.get('/getSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const split = await knex('split')
+      .select('*')
+      .where('split_id', req.params.splitId)
+      .andWhere('creator_id', user.user_id)
+      .first();
+
+    if (!split) {
+      return res.status(404).json({ error: 'Split not found or unauthorized' });
+    }
+
+    res.json(split);
+  } catch (error) {
+    console.error('Error fetching split:', error);
+    res.status(500).json({ error: 'Failed to fetch split details' });
+  }
+});
+
+// Update split
+app.put('/updateSplit/:splitId', async (req, res) => {
+  if (!authorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await knex.transaction(async (trx) => {
+      // Check if user is split creator
+      const split = await trx('split')
+        .where('split_id', req.params.splitId)
+        .andWhere('creator_id', user.user_id)
+        .first();
+
+      if (!split) {
+        throw new Error('Split not found or you are not the creator');
+      }
+
+      // Update split details
+      await trx('split')
+        .where('split_id', req.params.splitId)
+        .update({
+          split_name: req.body.split_name,
+          total_amount: req.body.total_amount,
+          date_due: req.body.date_due,
+          recurring: req.body.recurring === 'on',
+          frequency: req.body.recurring === 'on' ? req.body.frequency : null
+        });
+
+      // Get all users in the house
+      const houseUsers = await trx('user_houses')
+        .select('user_id')
+        .where('house_id', split.house_id);
+
+      // Calculate new equal share
+      const equalShare = parseFloat(req.body.total_amount) / houseUsers.length;
+
+      // Update payment records for each user
+      for (const houseUser of houseUsers) {
+        await trx('payment')
+          .where({
+            split_id: req.params.splitId,
+            user_id: houseUser.user_id
+          })
+          .update({
+            amount_due: equalShare
+          });
+      }
+    });
+
+    res.json({ message: 'Split updated successfully' });
+  } catch (error) {
+    console.error('Error updating split:', error);
+    res.status(500).json({ 
+      error: 'Failed to update split',
+      details: error.message 
+    });
+  }
+});
+
+// Add authentication middleware
+const authenticateUser = (req, res, next) => {
+  if (!req.session || !req.session.user) {
+    return res.redirect('/login');
+  }
+  next();
+};
+
+// Apply middleware to protected routes
+app.get('/newSplit', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.session.user.user_id;
+    // ... rest of the route handler
+  } catch (error) {
+    console.error('Error fetching houses and splits:', error);
+    res.status(500).render('error', { message: 'Error fetching houses and splits' });
+  }
 });
 
 // port number, (parameters) => what you want it to do.
