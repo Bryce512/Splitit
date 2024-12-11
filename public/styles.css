@@ -12,6 +12,21 @@
   color: var(--text-main);
 }
 
+/* Ensure the body takes up the full height */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+/* Use flexbox on the page to push footer to bottom */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Main content should expand to take available space */
+.main-content {
+  flex: 1;
+}
 
 .avatar {
   width: 45px;         /* Adjust size as needed */
@@ -132,15 +147,27 @@ button:hover {
   text-align: left; /* Aligns the text within the label to the left */
   width: 200px;
 }
-
+/* Footer should stick at the bottom */
 .page-footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px 0; /* Adjust padding as needed */
+  margin-top: auto; /* Pushes the footer to the bottom */
 }
 
-.page-footer container {
-  padding: 40;
+.page-footer .container {
+  padding: 0px; /* Adjust as needed */
+}
+
+/* Optional: Style the page-footer to fit the design better */
+.page-footer h5 {
+  margin-bottom: 10px;
+}
+
+.page-footer h6 {
+  font-size: 1rem;
+  color: #b0bec5;
 }
 
 /* Modal Styles */

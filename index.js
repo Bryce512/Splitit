@@ -118,64 +118,72 @@ app.get('/newHouse', async (req, res) => {
 });
 
 
-
-
-// Route to handle the house creation form submission
 app.post('/createHouse', async (req, res) => {
-  if (authorized) {
+  if (authorized) {  // Make sure 'authorized' is defined and works as expected
     try {
-        await knex.transaction(async trx => {
-          // Insert into houses table
-          const [houseId] = await trx('houses').insert({
-            owner_id: req.body.owner_id, // You'll need to pass this from the form
-            st_address: req.body.st_address,
-            city: req.body.city,
-            state: req.body.state,
-            zip: req.body.zip,
-            house_type: req.body.house_type,
-            monthly_total: req.body.monthly_rent
-          }).returning('house_id');
 
-          // Insert into user_houses table for each tenant
-          const userHousesAssignments = req.body.tenants.map(tenant => ({
-            user_id: tenant.userId,
-            house_id: houseId
-          }));
+      const body = req.body;
+      console.log(body);
 
-          await trx('user_houses').insert(userHousesAssignments);
+      await knex.transaction(async trx => {
+        // Insert into houses table
+        let [houseId] = await trx('houses').insert({
+          owner_id: req.body.owner_id, // You'll need to pass this from the form
+          st_address: req.body.st_address,
+          city: req.body.city,
+          state: req.body.state,
+          zip: req.body.zip,
+          house_type: req.body.house_type,
+          monthly_total: req.body.monthly_rent
+        }).returning('house_id');  // Return the inserted house_id
 
-          // Create initial split record
-          await trx('split').insert({
-            creator_id: req.body.owner_id,  // Same as house owner
-            house_id: houseId,
-            creator_pays: true,  // Or whatever default you want
-            calc_method: true,   // Default calculation method
-            total_amount: req.body.monthly_rent,
-            date_due: req.body.rent_due_date,
-            recurring: true,     // For monthly rent
-            frequency: 'monthly' // For rent payments
-          });
+        houseId = houseId.house_id;
 
-          // Create payment records for each tenant
-          const payments = req.body.tenants.map(tenant => ({
-            split_id: splitId,
-            user_id: tenant.userId,
-            amount_due: (req.body.monthly_rent * (tenant.percentage / 100)),
-            pmt_method: 'venmo'  // Default payment method
-          }));
+        // Insert into user_houses table for each tenant
+        const userHousesAssignments = req.body.tenants.map(tenant => ({
+          user_id: tenant.userId,
+          house_id: houseId
+        }));
 
-          await trx('payment').insert(payments);
-        });
+        await trx('user_houses').insert(userHousesAssignments);
 
-        res.redirect('/dashboard');
-      } catch (error) {
-        console.error('Error creating house:', error);
-        res.redirect('/newHouse?error=Failed to create house');
-      }
+        // Create initial split record
+        const [splitId] = await trx('split').insert({
+          creator_id: req.body.owner_id,  // Same as house owner
+          house_id: houseId,
+          creator_pays: true,  // Or whatever default you want
+          calc_method: true,   // Default calculation method
+          total_amount: req.body.monthly_rent,
+          date_due: req.body.rent_due_date,
+          recurring: true,     // For monthly rent
+          frequency: 'monthly' // For rent payments
+        }).returning('split_id'); // Return the inserted split_id
+
+        // Create payment records for each tenant
+        const payments = req.body.tenants.map(tenant => ({
+          split_id: splitId, // Use the split_id from the inserted split
+          user_id: tenant.userId,
+          amount_due: (req.body.monthly_rent * (tenant.percentage / 100)),
+          pmt_method: 'venmo'  // Default payment method
+        }));
+
+        console.log(typeof payments.amount_due, payments);
+
+
+        await trx('payment').insert(payments);
+      });
+
+      // If everything goes well, redirect to the dashboard
+      res.redirect('/dashboard');
+    } catch (error) {
+      console.error('Error creating house:', error);
+      res.redirect('/newHouse?error=Failed to create house');
+    }
   } else {
-    res.redirect('/login')
+    res.redirect('/login'); // Redirect to login if not authorized
   }
 });
+
   
 app.get('/home', async (req, res) => {
   if (authorized) {
@@ -203,6 +211,20 @@ app.get('/home', async (req, res) => {
   }
 });
 
+app.post('/makePayment/:id', async (req, res) => {
+  if (authorized) {
+    const id = req.params.id;
+    const status = req.body.status;
+    await knex('payment')
+    .where('pmt_id', id)
+    .update('status', status)
+
+    res.redirect('/home')
+
+  } else {
+    res.redirect('/login');
+  }
+})
 
 // Route to display the new profile form
 app.get('/newProfile', (req, res) => {
@@ -271,12 +293,6 @@ app.get('/newSplit', async (req, res) => {
         'split.total_amount',
         'split.date_due'
       )
-      .where('houses.owner_id', user.user_id)
-      .orWhereIn('houses.house_id', function() {
-        this.select('house_id')
-          .from('user_houses')
-          .where('user_id', user.user_id);
-      })
       .leftJoin('split', 'houses.house_id', 'split.house_id')
       .orderBy('houses.house_id', 'split.date_due');
 
@@ -329,7 +345,7 @@ app.post('/createSplit', async (req, res) => {
   if (!authorized) {
     return res.redirect('/login');
   }
-
+  console.log(req.body)
   try {
     await knex.transaction(async (trx) => {
       // Create the split

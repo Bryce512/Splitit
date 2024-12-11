@@ -1,55 +1,57 @@
 <%- include('components/navbar') %>
 
-<div class="container">
-  <!-- Page Header -->
-  <h1 class="center-align">Welcome Home <%- user.first_name %>!</h1>
-  <br>
-
+<main class="main-content">
   <div class="container">
-    <!-- Recent Splits Section -->
-    <h2 class="header-text">Recent Splits</h2>
+    <!-- Page Header -->
+    <h1 class="center-align">Welcome Home <%- user.first_name %>!</h1>
+    <br>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-      <input 
-        type="text" 
-        id="searchBox" 
-        placeholder="Search by Payment Title" 
-        oninput="liveSearch(this.value)">
+    <div class="container">
+      <!-- Recent Splits Section -->
+      <h2 class="header-text">Recent Splits</h2>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="searchBox" 
+          placeholder="Search by Payment Title" 
+          oninput="liveSearch(this.value)">
+      </div>
+
+      <ul class="collection" id="payment_container">
+        <% payments.forEach(payment => { %>
+          <li class="collection-item editable-row" 
+              data-id="<%= user.user_id %>" 
+              payment-id="<%= payment.pmt_id %>" 
+              amount_due="<%= payment.amount_due %>"
+              split_name="<%= payment.split_name %>"
+              type="payment">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <!-- Left side: Split name and status -->
+                <div class="left-content">
+                  <span class="title"><%= payment.split_name %></span>
+                  <p><%= payment.status %></p>
+                </div>
+
+                <!-- Right side: Amount Due -->
+                <div class="secondary-content" style="text-align: right;">
+                  <i class="material-icons" style="display: inline-block; text-align: right; margin-right: 20px;"><%= payment.amount_due %></i>
+                </div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
     </div>
-
-    <ul class="collection" id="payment_container">
-      <% payments.forEach(payment => { %>
-        <li class="collection-item editable-row" 
-            data-id="<%= user.user_id %>" 
-            payment-id="<%= payment.pmt_id %>" 
-            amount_due="<%= payment.amount_due %>"
-            split_name="<%= payment.split_name %>"
-            type = "payment">
-          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-              <!-- Left side: Split name and status -->
-              <div class="left-content">
-                <span class="title"><%= payment.split_name %></span>
-                <p><%= payment.status %></p>
-              </div>
-
-              <!-- Right side: Amount Due -->
-              <div class="secondary-content" style="text-align: right;">
-                <i class="material-icons" style="display: inline-block; text-align: right; margin-right: 20px;"><%= payment.amount_due %></i>
-              </div>
-          </div>
-        </li>
-      <% }) %>
-    </ul>
   </div>
-</div>
+</main>
 
 <footer class="page-footer main_Color">
   <div class="container">
     <h5 class="white-text">SplitIt</h5>
     <h6 class="grey-text text-lighten-4">
-      The SplitIt tool is designed to help users easily split bills 
-       utilities and rent. 
+      The SplitIt tool is designed to help users easily split bills, 
+      utilities, and rent. 
       They can be scheduled or a one-time split. 
       Everything is handled from the security of Venmo Transactions.
     </h6>
@@ -57,13 +59,13 @@
   </div>
 </footer>
 
-    <!-- Materialize JavaScript (for interactive components) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const elems = document.querySelectorAll('.sidenav');
-        M.Sidenav.init(elems);
-      });
+<!-- Materialize JavaScript (for interactive components) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const elems = document.querySelectorAll('.sidenav');
+    M.Sidenav.init(elems);
+  });
 
   // Search Function
   async function liveSearch(query) {
@@ -79,7 +81,6 @@
 
     document.querySelectorAll('.editable-row').forEach(row => {
       const split_name = row.getAttribute('split_name').toLowerCase();
-     
 
       if (split_name.includes(queryLower)) {
         row.style.display = '';
@@ -88,19 +89,18 @@
       }
     });
   }
-  </script>
+</script>
 
 <div id="editModal" class="editModal hidden">
   <div class="modal-content">
     <h4 id="modalTitle">Pay Split</h4>
     <p id="modal_Amount_Due"></p>
     <br>
-    <form id="paymentForm"action="/makePayment/${id}" method="POST">
+    <form id="paymentForm" action="/makePayment/${id}" method="POST">
       <select style="display: block;" name="status" id="status" required>
         <option value="">Select Status</option>
         <option value="waiting">Waiting</option>
         <option value="paid">Paid</option>
-        <!-- Option items will be dynamically generated -->
       </select>
       <div class="modal-footer">
         <button type="button" class="adminModalClose btn grey">Cancel</button>
@@ -112,4 +112,3 @@
 
 <!-- Overlay for Modal -->
 <div id="overlay" class="overlay"></div>
-
